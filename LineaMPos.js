@@ -1,8 +1,8 @@
 'use strict';
-import { LineaEmv } from './NativeBridges';
+import { MPos } from './NativeBridges';
 import { NativeEventEmitter } from 'react-native';
 
-export default class LineaEmv {
+export class LineaMPos {
 	constructor() {
 		this.evt = new NativeEventEmitter(Linea);
 	}

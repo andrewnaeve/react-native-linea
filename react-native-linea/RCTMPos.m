@@ -1,9 +1,9 @@
-#import "RCTLineaEmv.h"
+#import "RCTMPos.h"
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventDispatcher.h>
 #import <React/RCTEventEmitter.h>
 
-@implementation RCTLineaEmv
+@implementation RCTMPos
 
 @synthesize bridge = _bridge;
 
