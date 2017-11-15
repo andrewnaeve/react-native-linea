@@ -24,4 +24,11 @@ export default class LineaMPos {
 			}
 		});
 	}
+
+	addDebugListener() {
+		return this.evt.addListener('debug', data => {
+			console.log(data);
+			// callback(data);
+		});
+	}
 }

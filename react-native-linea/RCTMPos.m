@@ -54,23 +54,34 @@ RCT_EXPORT_METHOD(connect) {
     [linea connect];
 }
 
+// EMV2 Init
+
+void displayAlert(NSString *title, NSString *message)
+{
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title message:message delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+    [alert show];
+}
+
+#define RF_COMMAND(operation,c) {if(!c){displayAlert(@"Operation failed!", [NSString stringWithFormat:@"%@ failed, error %@, code: %d",operation,error.localizedDescription,(int)error.code]); return false;} }
+
 RCT_EXPORT_METHOD(emv2Init) {
-    NSError *error;
+    [self initEmv];
+}
+
+-(void) initEmv
+{
+    NSError *error=nil;
     linea = [DTDevices sharedDevice];
-    [linea emv2Initialise:&error];
-    if(error) {
-        NSLog(@"Error you dumb: %@", error);
-    }
     DTEMV2Info *info=[linea emv2GetInfo:nil];
     if(info) {
         bool universal=[linea getSupportedFeature:FEAT_EMVL2_KERNEL error:nil]&EMV_KERNEL_UNIVERSAL;
         bool lin = linea.deviceType==DEVICE_TYPE_LINEA;
-        
-        NSData * configContactless=[Config paymentGetConfigurationFromXML:lin]
-    }
+        NSString *uni = universal?@"uni true":@"uni false";
+        NSString *isIt = lin?@"true":@"false";
+        [self sendDebug:uni];
+        [self sendDebug:isIt];
+        }
     
 }
-
-
 
 @end
