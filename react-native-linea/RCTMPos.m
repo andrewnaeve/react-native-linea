@@ -14,4 +14,15 @@ RCT_EXPORT_MODULE();
     return YES;
 }
 
+#pragma mark Events
+- (NSArray<NSString *> *)supportedEvents {
+    return @[
+                @"connectionState",
+                @"rfcardInfo",
+                @"debug",
+                @"magneticInfo",
+                @"barcodeInfo"
+            ];
+}
+
 @end
