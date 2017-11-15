@@ -25,10 +25,10 @@ export default class LineaMPos {
 		});
 	}
 
-	addDebugListener() {
+	addDebugListener(callback) {
 		return this.evt.addListener('debug', data => {
 			console.log(data);
-			// callback(data);
+			callback(data);
 		});
 	}
 }
