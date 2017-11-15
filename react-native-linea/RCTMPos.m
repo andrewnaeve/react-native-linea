@@ -23,8 +23,14 @@ RCT_EXPORT_MODULE();
             ];
 }
 
+// Events
+
 - (void)sendConnectionState:(NSString *)state {
     [self sendEventWithName:@"connectionState" body:state];
+}
+
+- (void)sendDebug:(NSString *)debug {
+    [self sendEventWithName:@"debug" body:debug];
 }
 
 - (void)connectionState:(int)state {
@@ -44,9 +50,6 @@ RCT_EXPORT_MODULE();
     }
 }
 
-- (void)sendDebug:(NSString *)debug {
-    [self sendEventWithName:@"debug" body:debug];
-}
 
 RCT_EXPORT_METHOD(connect) {
     linea = [DTDevices sharedDevice];
@@ -81,6 +84,7 @@ RCT_EXPORT_METHOD(emv2Init) {
         [self sendDebug:uni];
         [self sendDebug:isIt];
         }
+    [self sendDebug:@"haha"];
     
 }
 
