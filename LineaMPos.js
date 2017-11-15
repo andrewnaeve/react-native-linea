@@ -27,7 +27,7 @@ export default class LineaMPos {
 
 	addDebugListener(callback) {
 		return this.evt.addListener('debug', data => {
-			console.log(data);
+			console.log('debug:', data);
 			callback(data);
 		});
 	}
