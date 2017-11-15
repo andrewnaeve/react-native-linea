@@ -13,6 +13,7 @@
 		17B4ECE41E16B80000E47CA5 /* DTDevices.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 17B4ECE31E16B80000E47CA5 /* DTDevices.h */; };
 		17B4ECE71E16B81100E47CA5 /* libdtdev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 17B4ECE61E16B81100E47CA5 /* libdtdev.a */; };
 		BC56AB8F1FBBCD87001C7AF2 /* RCTMPos.m in Sources */ = {isa = PBXBuildFile; fileRef = BC56AB8E1FBBCD87001C7AF2 /* RCTMPos.m */; };
+		BC56ABBE1FBBF9FD001C7AF2 /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = BC56ABBD1FBBF9FD001C7AF2 /* Config.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -38,6 +39,21 @@
 		17B4ECE61E16B81100E47CA5 /* libdtdev.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libdtdev.a; sourceTree = "<group>"; };
 		BC56AB8D1FBBCD87001C7AF2 /* RCTMPos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTMPos.h; sourceTree = "<group>"; };
 		BC56AB8E1FBBCD87001C7AF2 /* RCTMPos.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTMPos.m; sourceTree = "<group>"; };
+		BC56ABAF1FBBF9FC001C7AF2 /* contactless_capk.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = contactless_capk.xml; sourceTree = "<group>"; };
+		BC56ABB01FBBF9FC001C7AF2 /* cl.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = cl.xml; sourceTree = "<group>"; };
+		BC56ABB11FBBF9FC001C7AF2 /* contactless_linea_pe.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = contactless_linea_pe.xml; sourceTree = "<group>"; };
+		BC56ABB21FBBF9FC001C7AF2 /* linea.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = linea.xml; sourceTree = "<group>"; };
+		BC56ABB31FBBF9FC001C7AF2 /* contact.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = contact.xml; sourceTree = "<group>"; };
+		BC56ABB41FBBF9FC001C7AF2 /* contactless_linea.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = contactless_linea.xml; sourceTree = "<group>"; };
+		BC56ABB51FBBF9FC001C7AF2 /* contactless_old.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = contactless_old.xml; sourceTree = "<group>"; };
+		BC56ABB61FBBF9FC001C7AF2 /* contactless copy.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "contactless copy.xml"; sourceTree = "<group>"; };
+		BC56ABB71FBBF9FC001C7AF2 /* contact_capk.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = contact_capk.xml; sourceTree = "<group>"; };
+		BC56ABB81FBBF9FC001C7AF2 /* contactless.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = contactless.xml; sourceTree = "<group>"; };
+		BC56ABB91FBBF9FC001C7AF2 /* contactless_tolinea.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = contactless_tolinea.xml; sourceTree = "<group>"; };
+		BC56ABBA1FBBF9FC001C7AF2 /* Contact_EMV_Config.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Contact_EMV_Config.xml; sourceTree = "<group>"; };
+		BC56ABBB1FBBF9FC001C7AF2 /* contact_linea_pe.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = contact_linea_pe.xml; sourceTree = "<group>"; };
+		BC56ABBC1FBBF9FD001C7AF2 /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
+		BC56ABBD1FBBF9FD001C7AF2 /* Config.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Config.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +89,9 @@
 		17B4EBED1E165D3B00E47CA5 /* react-native-linea */ = {
 			isa = PBXGroup;
 			children = (
+				BC56ABAE1FBBF9FC001C7AF2 /* Config */,
+				BC56ABBC1FBBF9FD001C7AF2 /* Config.h */,
+				BC56ABBD1FBBF9FD001C7AF2 /* Config.m */,
 				BC56AB8D1FBBCD87001C7AF2 /* RCTMPos.h */,
 				BC56AB8E1FBBCD87001C7AF2 /* RCTMPos.m */,
 				17B4ECE31E16B80000E47CA5 /* DTDevices.h */,
@@ -89,6 +108,26 @@
 				17B4ECE61E16B81100E47CA5 /* libdtdev.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		BC56ABAE1FBBF9FC001C7AF2 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				BC56ABAF1FBBF9FC001C7AF2 /* contactless_capk.xml */,
+				BC56ABB01FBBF9FC001C7AF2 /* cl.xml */,
+				BC56ABB11FBBF9FC001C7AF2 /* contactless_linea_pe.xml */,
+				BC56ABB21FBBF9FC001C7AF2 /* linea.xml */,
+				BC56ABB31FBBF9FC001C7AF2 /* contact.xml */,
+				BC56ABB41FBBF9FC001C7AF2 /* contactless_linea.xml */,
+				BC56ABB51FBBF9FC001C7AF2 /* contactless_old.xml */,
+				BC56ABB61FBBF9FC001C7AF2 /* contactless copy.xml */,
+				BC56ABB71FBBF9FC001C7AF2 /* contact_capk.xml */,
+				BC56ABB81FBBF9FC001C7AF2 /* contactless.xml */,
+				BC56ABB91FBBF9FC001C7AF2 /* contactless_tolinea.xml */,
+				BC56ABBA1FBBF9FC001C7AF2 /* Contact_EMV_Config.xml */,
+				BC56ABBB1FBBF9FC001C7AF2 /* contact_linea_pe.xml */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -150,6 +189,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BC56AB8F1FBBCD87001C7AF2 /* RCTMPos.m in Sources */,
+				BC56ABBE1FBBF9FD001C7AF2 /* Config.m in Sources */,
 				17B4EBF01E165D3B00E47CA5 /* RCTLinea.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
