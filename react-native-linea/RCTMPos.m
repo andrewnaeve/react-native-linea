@@ -2,6 +2,7 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventDispatcher.h>
 #import <React/RCTEventEmitter.h>
+#import "Config.h"
 
 @implementation RCTMPos
 
@@ -43,6 +44,10 @@ RCT_EXPORT_MODULE();
     }
 }
 
+- (void)sendDebug:(NSString *)debug {
+    [self sendEventWithName:@"debug" body:debug];
+}
+
 RCT_EXPORT_METHOD(connect) {
     linea = [DTDevices sharedDevice];
     [linea setDelegate:self];
@@ -50,11 +55,20 @@ RCT_EXPORT_METHOD(connect) {
 }
 
 RCT_EXPORT_METHOD(emv2Init) {
-    NSError *error = nil;
-    [[DTDevices sharedDevice] emv2Initialise:&error];
+    NSError *error;
+    linea = [DTDevices sharedDevice];
+    [linea emv2Initialise:&error];
     if(error) {
-        NSLog(@"Error: %@", error);
+        NSLog(@"Error you dumb: %@", error);
     }
+    DTEMV2Info *info=[linea emv2GetInfo:nil];
+    if(info) {
+        bool universal=[linea getSupportedFeature:FEAT_EMVL2_KERNEL error:nil]&EMV_KERNEL_UNIVERSAL;
+        bool lin = linea.deviceType==DEVICE_TYPE_LINEA;
+        
+        NSData * configContactless=[Config paymentGetConfigurationFromXML:lin]
+    }
+    
 }
 
 
