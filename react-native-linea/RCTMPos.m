@@ -25,4 +25,8 @@ RCT_EXPORT_MODULE();
             ];
 }
 
+RCT_EXPORT_METHOD(emv2Init) {
+    [linea emv2Initialise];
+}
+
 @end

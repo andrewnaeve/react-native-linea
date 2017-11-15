@@ -6,6 +6,10 @@ export default class LineaMPos {
 	constructor() {
 		this.evt = new NativeEventEmitter(MPos);
 	}
+
+	emvInit() {
+		MPos.emv2Init();
+	}
 	sayHi() {
 		console.log('hey you');
 	}
