@@ -12,6 +12,7 @@
 		17B4EBF11E165D3B00E47CA5 /* RCTLinea.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 17B4EBEE1E165D3B00E47CA5 /* RCTLinea.h */; };
 		17B4ECE41E16B80000E47CA5 /* DTDevices.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 17B4ECE31E16B80000E47CA5 /* DTDevices.h */; };
 		17B4ECE71E16B81100E47CA5 /* libdtdev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 17B4ECE61E16B81100E47CA5 /* libdtdev.a */; };
+		BC56AB8F1FBBCD87001C7AF2 /* RCTMPos.m in Sources */ = {isa = PBXBuildFile; fileRef = BC56AB8E1FBBCD87001C7AF2 /* RCTMPos.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -35,6 +36,8 @@
 		17B4EBEF1E165D3B00E47CA5 /* RCTLinea.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RCTLinea.m; sourceTree = "<group>"; };
 		17B4ECE31E16B80000E47CA5 /* DTDevices.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DTDevices.h; path = ../DTDevices.h; sourceTree = "<group>"; };
 		17B4ECE61E16B81100E47CA5 /* libdtdev.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libdtdev.a; sourceTree = "<group>"; };
+		BC56AB8D1FBBCD87001C7AF2 /* RCTMPos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RCTMPos.h; sourceTree = "<group>"; };
+		BC56AB8E1FBBCD87001C7AF2 /* RCTMPos.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RCTMPos.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,6 +73,8 @@
 		17B4EBED1E165D3B00E47CA5 /* react-native-linea */ = {
 			isa = PBXGroup;
 			children = (
+				BC56AB8D1FBBCD87001C7AF2 /* RCTMPos.h */,
+				BC56AB8E1FBBCD87001C7AF2 /* RCTMPos.m */,
 				17B4ECE31E16B80000E47CA5 /* DTDevices.h */,
 				17B4EBEE1E165D3B00E47CA5 /* RCTLinea.h */,
 				17B4EBEF1E165D3B00E47CA5 /* RCTLinea.m */,
@@ -144,6 +149,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BC56AB8F1FBBCD87001C7AF2 /* RCTMPos.m in Sources */,
 				17B4EBF01E165D3B00E47CA5 /* RCTLinea.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
