@@ -4,7 +4,7 @@ import { NativeEventEmitter } from 'react-native';
 
 export class LineaMPos {
 	constructor() {
-		this.evt = new NativeEventEmitter(Linea);
+		this.evt = new NativeEventEmitter(MPos);
 	}
 	sayHi() {
 		console.log('hey you');
