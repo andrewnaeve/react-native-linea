@@ -7,10 +7,21 @@ export default class LineaMPos {
 		this.evt = new NativeEventEmitter(MPos);
 	}
 
+	connect() {
+		MPos.connect();
+	}
+
 	emvInit() {
 		MPos.emv2Init();
 	}
-	sayHi() {
-		console.log('hey you');
+
+	addConnectionStateListener(callback) {
+		return this.evt.addListener('connectionState', data => {
+			if (data === 'connected') {
+				callback(true);
+			} else {
+				callback(false);
+			}
+		});
 	}
 }
