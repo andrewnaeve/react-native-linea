@@ -6,4 +6,7 @@ export default class LineaEmv {
 	constructor() {
 		this.evt = new NativeEventEmitter(Linea);
 	}
+	sayHi() {
+		console.log('hey you');
+	}
 }
