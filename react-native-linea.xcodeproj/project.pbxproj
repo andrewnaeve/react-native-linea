@@ -14,6 +14,8 @@
 		17B4ECE71E16B81100E47CA5 /* libdtdev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 17B4ECE61E16B81100E47CA5 /* libdtdev.a */; };
 		BC56AB8F1FBBCD87001C7AF2 /* RCTMPos.m in Sources */ = {isa = PBXBuildFile; fileRef = BC56AB8E1FBBCD87001C7AF2 /* RCTMPos.m */; };
 		BC56ABBE1FBBF9FD001C7AF2 /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = BC56ABBD1FBBF9FD001C7AF2 /* Config.m */; };
+		BC56ABC11FBC0622001C7AF2 /* XMLParser.m in Sources */ = {isa = PBXBuildFile; fileRef = BC56ABC01FBC0622001C7AF2 /* XMLParser.m */; };
+		BC56ABC41FBC0692001C7AF2 /* EMVTLV.m in Sources */ = {isa = PBXBuildFile; fileRef = BC56ABC21FBC0692001C7AF2 /* EMVTLV.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -54,6 +56,10 @@
 		BC56ABBB1FBBF9FC001C7AF2 /* contact_linea_pe.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = contact_linea_pe.xml; sourceTree = "<group>"; };
 		BC56ABBC1FBBF9FD001C7AF2 /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
 		BC56ABBD1FBBF9FD001C7AF2 /* Config.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Config.m; sourceTree = "<group>"; };
+		BC56ABBF1FBC0621001C7AF2 /* XMLParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMLParser.h; path = "react-native-linea/XMLParser.h"; sourceTree = SOURCE_ROOT; };
+		BC56ABC01FBC0622001C7AF2 /* XMLParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMLParser.m; path = "react-native-linea/XMLParser.m"; sourceTree = SOURCE_ROOT; };
+		BC56ABC21FBC0692001C7AF2 /* EMVTLV.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EMVTLV.m; sourceTree = "<group>"; };
+		BC56ABC31FBC0692001C7AF2 /* EMVTLV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMVTLV.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,6 +103,10 @@
 				17B4ECE31E16B80000E47CA5 /* DTDevices.h */,
 				17B4EBEE1E165D3B00E47CA5 /* RCTLinea.h */,
 				17B4EBEF1E165D3B00E47CA5 /* RCTLinea.m */,
+				BC56ABC01FBC0622001C7AF2 /* XMLParser.m */,
+				BC56ABC31FBC0692001C7AF2 /* EMVTLV.h */,
+				BC56ABC21FBC0692001C7AF2 /* EMVTLV.m */,
+				BC56ABBF1FBC0621001C7AF2 /* XMLParser.h */,
 			);
 			path = "react-native-linea";
 			sourceTree = "<group>";
@@ -188,6 +198,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BC56ABC41FBC0692001C7AF2 /* EMVTLV.m in Sources */,
+				BC56ABC11FBC0622001C7AF2 /* XMLParser.m in Sources */,
 				BC56AB8F1FBBCD87001C7AF2 /* RCTMPos.m in Sources */,
 				BC56ABBE1FBBF9FD001C7AF2 /* Config.m in Sources */,
 				17B4EBF01E165D3B00E47CA5 /* RCTLinea.m in Sources */,
