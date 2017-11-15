@@ -50,7 +50,11 @@ RCT_EXPORT_METHOD(connect) {
 }
 
 RCT_EXPORT_METHOD(emv2Init) {
-    [linea emv2Initialise];
+    NSError *error;
+    [[DTDevices sharedDevice] emv2Initialise:&error];
+    if(error) {
+        NSLog(@"Error: %@", error);
+    }
 }
 
 
