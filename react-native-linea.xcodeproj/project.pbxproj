@@ -60,6 +60,7 @@
 		BC56ABC01FBC0622001C7AF2 /* XMLParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XMLParser.m; path = "react-native-linea/XMLParser.m"; sourceTree = SOURCE_ROOT; };
 		BC56ABC21FBC0692001C7AF2 /* EMVTLV.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EMVTLV.m; sourceTree = "<group>"; };
 		BC56ABC31FBC0692001C7AF2 /* EMVTLV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMVTLV.h; sourceTree = "<group>"; };
+		BC7F562C1FBD39AF00B849E7 /* crc32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +99,7 @@
 				BC56ABAE1FBBF9FC001C7AF2 /* Config */,
 				BC56ABBC1FBBF9FD001C7AF2 /* Config.h */,
 				BC56ABBD1FBBF9FD001C7AF2 /* Config.m */,
+				BC7F562C1FBD39AF00B849E7 /* crc32.h */,
 				BC56AB8D1FBBCD87001C7AF2 /* RCTMPos.h */,
 				BC56AB8E1FBBCD87001C7AF2 /* RCTMPos.m */,
 				17B4ECE31E16B80000E47CA5 /* DTDevices.h */,

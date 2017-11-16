@@ -4,6 +4,7 @@
 #import <React/RCTEventEmitter.h>
 #import "Config.h"
 #import "EMVTLV.h"
+#import "crc32.h"
 
 @implementation RCTMPos
 
