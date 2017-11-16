@@ -73,7 +73,7 @@ RCT_EXPORT_METHOD(connect) {
  #define RF_COMMAND(operation,c) {if(!c){displayAlert(@"Operation failed!", [NSString stringWithFormat:@"%@ failed, error %@, code: %d",operation,error.localizedDescription,(int)error.code]); return false;} }
 
 RCT_EXPORT_METHOD(emv2Init) {
-    [self initEmv];
+    [self emv2Init];
 }
 
 static uint32_t calculateConfigurationChecksum(NSData *config)
@@ -120,7 +120,7 @@ static int getConfigurationVesrsion(NSData *configuration)
     return 0;
 }
 
- -(BOOL) initEmv
+ -(BOOL) emv2Init
  {
      // universal = false, linea = true;
     NSError *error=nil;
@@ -200,7 +200,7 @@ static int getConfigurationVesrsion(NSData *configuration)
     [progressViewController updateText:@"Use payment card to initiate transaction"];
     [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
 
-    if(![EMV2ViewController emv2Init] || ![self emv2StartTransaction])
+    if(![RCTMPos emv2Init] || ![self emv2StartTransaction])
     {
         [linea emv2Deinitialise:nil];
         [progressViewController.view removeFromSuperview];
