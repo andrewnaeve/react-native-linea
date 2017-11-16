@@ -5,6 +5,8 @@
 #import "Config.h"
 #import "EMVTLV.h"
 #import "crc32.h"
+#import "EMVTags.h"
+
 
 @implementation RCTMPos
 
@@ -146,7 +148,7 @@ static int getConfigurationVesrsion(NSData *configuration)
     //overwrite terminal capabilities flag depending on the connected device
     NSData *initData=nil;
     TLV *tag9f33=nil;
-    if([dtdev getSupportedFeature:FEAT_PIN_ENTRY error:nil]==FEAT_SUPPORTED)
+    if([linea getSupportedFeature:FEAT_PIN_ENTRY error:nil]==FEAT_SUPPORTED)
     {//pinpad
         tag9f33=[TLV tlvWithHexString:@"60 B0 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
         //            tag9f33=[TLV tlvWithHexString:@"60 60 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
@@ -175,17 +177,17 @@ static int getConfigurationVesrsion(NSData *configuration)
 
     initData=[TLV encodeTags:@[tagCVVEnabled, tagDecimalSeparator, tagC8, tagCD, tagPANCheckDisabled]];
 
-    [dtdev emv2SetMessageForID:EMV_UI_ERROR_PROCESSING font:FONT_8X16 message:nil error:nil]; //disable transaction error
+    [linea emv2SetMessageForID:EMV_UI_ERROR_PROCESSING font:FONT_8X16 message:nil error:nil]; //disable transaction error
 
-    if([dtdev getSupportedFeature:FEAT_PIN_ENTRY error:nil]==FEAT_SUPPORTED)
-        [dtdev emv2SetPINOptions:PIN_ENTRY_DISABLED error:nil];
+    if([linea getSupportedFeature:FEAT_PIN_ENTRY error:nil]==FEAT_SUPPORTED)
+        [linea emv2SetPINOptions:PIN_ENTRY_DISABLED error:nil];
     else
-        [dtdev emv2SetPINOptions:PIN_ENTRY_DISABLED error:nil];
+        [linea emv2SetPINOptions:PIN_ENTRY_DISABLED error:nil];
 
     //amount: $1.00, currency code: USD(840), according to ISO 4217
-    RF_COMMAND(@"EMV Init",[dtdev emv2SetTransactionType:0 amount:100 currencyCode:840 error:&error]);
+    RF_COMMAND(@"EMV Init",[linea emv2SetTransactionType:0 amount:100 currencyCode:840 error:&error]);
     //start the transaction, transaction steps will be notified via emv2On... delegate methods
-    RF_COMMAND(@"EMV Start Transaction",[dtdev emv2StartTransactionOnInterface:EMV_INTERFACE_CONTACT|EMV_INTERFACE_CONTACTLESS|EMV_INTERFACE_MAGNETIC|EMV_INTERFACE_MAGNETIC_MANUAL flags:0 initData:initData timeout:7*60 error:&error]);
+    RF_COMMAND(@"EMV Start Transaction",[linea emv2StartTransactionOnInterface:EMV_INTERFACE_CONTACT|EMV_INTERFACE_CONTACTLESS|EMV_INTERFACE_MAGNETIC|EMV_INTERFACE_MAGNETIC_MANUAL flags:0 initData:initData timeout:7*60 error:&error]);
 
     return true;
 }
@@ -199,7 +201,7 @@ static int getConfigurationVesrsion(NSData *configuration)
 
     if(![EMV2ViewController emv2Init] || ![self emv2StartTransaction])
     {
-        [dtdev emv2Deinitialise:nil];
+        [linea emv2Deinitialise:nil];
         [progressViewController.view removeFromSuperview];
     }
 }
@@ -208,17 +210,17 @@ static int getConfigurationVesrsion(NSData *configuration)
 {
     [super viewWillAppear:animated];
     
-    dtdev=[DTDevices sharedDevice];
-    [dtdev addDelegate:self];
+    linea=[DTDevices sharedDevice];
+    [linea addDelegate:self];
 }
 
 -(void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
     
-    [dtdev removeDelegate:self];
-    [dtdev emv2CancelTransaction:nil];
-    [dtdev emv2Deinitialise:nil];
+    [linea removeDelegate:self];
+    [linea emv2CancelTransaction:nil];
+    [linea emv2Deinitialise:nil];
     [progressViewController.view removeFromSuperview];
 }
 
