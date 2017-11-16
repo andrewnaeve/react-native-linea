@@ -23,7 +23,7 @@ RCT_EXPORT_MODULE();
             ];
 }
 
-// Events
+ // Events
 
 - (void)sendConnectionState:(NSString *)state {
     [self sendEventWithName:@"connectionState" body:state];
@@ -57,37 +57,34 @@ RCT_EXPORT_METHOD(connect) {
     [linea connect];
 }
 
-// EMV2 Init
+ // EMV2 Init
 
-// void displayAlert(NSString *title, NSString *message)
-// {
-//     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title message:message delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
-//     [alert show];
-// }
+ void displayAlert(NSString *title, NSString *message)
+ {
+     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title message:message delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+     [alert show];
+ }
 
-// #define RF_COMMAND(operation,c) {if(!c){displayAlert(@"Operation failed!", [NSString stringWithFormat:@"%@ failed, error %@, code: %d",operation,error.localizedDescription,(int)error.code]); return false;} }
+ #define RF_COMMAND(operation,c) {if(!c){displayAlert(@"Operation failed!", [NSString stringWithFormat:@"%@ failed, error %@, code: %d",operation,error.localizedDescription,(int)error.code]); return false;} }
 
 RCT_EXPORT_METHOD(emv2Init) {
-    // [self initEmv];
-        linea = [DTDevices sharedDevice];
-    [linea setDelegate:self];
-    [linea connect];
+    [self initEmv];
 }
 
-// -(void) initEmv
-// {
-//     NSError *error=nil;
-//     linea = [DTDevices sharedDevice];
-//     DTEMV2Info *info=[linea emv2GetInfo:nil];
+ -(void) initEmv
+ {
+     NSError *error=nil;
+     linea = [DTDevices sharedDevice];
+     DTEMV2Info *info=[linea emv2GetInfo:nil];
 
-//     bool universal=[linea getSupportedFeature:FEAT_EMVL2_KERNEL error:nil]&EMV_KERNEL_UNIVERSAL;
-//     bool lin = linea.deviceType==DEVICE_TYPE_LINEA;
-//     NSString *uni = universal?@"uni true":@"uni false";
-//     NSString *isIt = lin?@"true":@"false";
-//     [self sendDebug:uni];
-//     [self sendDebug:isIt];
-//     [self sendDebug:@"haha"];
+     bool universal=[linea getSupportedFeature:FEAT_EMVL2_KERNEL error:nil]&EMV_KERNEL_UNIVERSAL;
+     bool lin = linea.deviceType==DEVICE_TYPE_LINEA;
+     NSString *uni = universal?@"uni true":@"uni false";
+     NSString *isIt = lin?@"true":@"false";
+     [self sendDebug:uni];
+     [self sendDebug:isIt];
+     [self sendDebug:@"haha"];
     
-// }
+ }
 
 @end
