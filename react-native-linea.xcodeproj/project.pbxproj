@@ -61,6 +61,8 @@
 		BC56ABC21FBC0692001C7AF2 /* EMVTLV.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EMVTLV.m; sourceTree = "<group>"; };
 		BC56ABC31FBC0692001C7AF2 /* EMVTLV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMVTLV.h; sourceTree = "<group>"; };
 		BC7F562C1FBD39AF00B849E7 /* crc32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32.h; sourceTree = "<group>"; };
+		BC7F562D1FBD42F000B849E7 /* EMVTags.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMVTags.h; sourceTree = "<group>"; };
+		BC7F562E1FBD42F000B849E7 /* EMVPrivateTags.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMVPrivateTags.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +110,8 @@
 				BC56ABC01FBC0622001C7AF2 /* XMLParser.m */,
 				BC56ABC31FBC0692001C7AF2 /* EMVTLV.h */,
 				BC56ABC21FBC0692001C7AF2 /* EMVTLV.m */,
+				BC7F562D1FBD42F000B849E7 /* EMVTags.h */,
+				BC7F562E1FBD42F000B849E7 /* EMVPrivateTags.h */,
 				BC56ABBF1FBC0621001C7AF2 /* XMLParser.h */,
 			);
 			path = "react-native-linea";
