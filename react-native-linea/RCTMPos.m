@@ -72,7 +72,7 @@ RCT_EXPORT_METHOD(connect) {
 
  #define RF_COMMAND(operation,c) {if(!c){displayAlert(@"Operation failed!", [NSString stringWithFormat:@"%@ failed, error %@, code: %d",operation,error.localizedDescription,(int)error.code]); return false;} }
 
-RCT_EXPORT_METHOD(emv2Init) {
+RCT_EXPORT_METHOD(emvInit) {
     [self emv2Init];
 }
 
@@ -195,39 +195,15 @@ static int getConfigurationVesrsion(NSData *configuration)
 
 -(void)onEMVTransaction:(id)sender
 {
-    [progressViewController viewWillAppear:FALSE];
-    [self.view addSubview:progressViewController.view];
     [progressViewController updateText:@"Use payment card to initiate transaction"];
     [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
 
     if(![RCTMPos emv2Init] || ![self emv2StartTransaction])
     {
         [linea emv2Deinitialise:nil];
-        [progressViewController.view removeFromSuperview];
     }
 }
 
--(void)viewWillAppear:(BOOL)animated
-{
-    [super viewWillAppear:animated];
-    
-    linea=[DTDevices sharedDevice];
-    [linea addDelegate:self];
-}
 
--(void)viewWillDisappear:(BOOL)animated
-{
-    [super viewWillDisappear:animated];
-    
-    [linea removeDelegate:self];
-    [linea emv2CancelTransaction:nil];
-    [linea emv2Deinitialise:nil];
-    [progressViewController.view removeFromSuperview];
-}
-
--(void)viewDidLoad
-{
-    [super viewDidLoad];
-}
 
 @end
