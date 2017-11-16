@@ -94,7 +94,7 @@ static int getConfigurationVesrsion(NSData *configuration)
     return 0;
 }
 
- -(void) initEmv
+ -(bool) initEmv
  {
      // universal = false, linea = true;
     NSError *error=nil;
@@ -102,11 +102,9 @@ static int getConfigurationVesrsion(NSData *configuration)
     DTEMV2Info *info=[linea emv2GetInfo:nil];
 
     if (info) {
-        bool universal=[linea getSupportedFeature:FEAT_EMVL2_KERNEL error:nil]&EMV_KERNEL_UNIVERSAL;
-        bool lin = linea.deviceType==DEVICE_TYPE_LINEA;
-
+        // bool universal=[linea getSupportedFeature:FEAT_EMVL2_KERNEL error:nil]&EMV_KERNEL_UNIVERSAL;
+        // bool lin = linea.deviceType==DEVICE_TYPE_LINEA;
         NSData *configContactless=[Config paymentGetConfigurationFromXML:@"contactless_linea.xml"];
-
         if(info.contactlessConfigurationVersion!=getConfigurationVesrsion(configContactless))
         {
             RF_COMMAND(@"EMV Load Contactless Configuration",[linea emv2LoadContactlessConfiguration:configContactless configurationIndex:0 error:&error]);
@@ -116,9 +114,7 @@ static int getConfigurationVesrsion(NSData *configuration)
         }
 
     }
-
-
-    
+    return true;
  }
 
 @end
