@@ -197,7 +197,7 @@ static int getConfigurationVesrsion(NSData *configuration)
 {
     [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
 
-    if(![RCTMPos emv2Init] || ![self emv2StartTransaction])
+    if(![self emv2Init] || ![self emv2StartTransaction])
     {
         [linea emv2Deinitialise:nil];
     }
