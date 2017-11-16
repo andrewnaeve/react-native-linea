@@ -3,6 +3,7 @@
 #import <React/RCTEventDispatcher.h>
 #import <React/RCTEventEmitter.h>
 #import "Config.h"
+#import "EMVTLV.h"
 
 @implementation RCTMPos
 
@@ -69,6 +70,27 @@ RCT_EXPORT_METHOD(connect) {
 
 RCT_EXPORT_METHOD(emv2Init) {
     [self initEmv];
+}
+
+static uint32_t calculateConfigurationChecksum(NSData *config)
+{
+    NSArray<TLV *> *tags=[TLV decodeTags:config];
+
+    CC_CRC32_CTX crc;
+    CC_CRC32_Init(&crc);
+
+    for (TLV *t in tags) {
+        if(t.tag!=0xE4)
+        {
+            CC_CRC32_Update(&crc, t.bytes, t.data.length);
+        }
+    }
+
+    uint8_t r[4];
+
+    CC_CRC32_Final(r, &crc);
+
+    return crc.crc;
 }
 
 static int getConfigurationVesrsion(NSData *configuration)
