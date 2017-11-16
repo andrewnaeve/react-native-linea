@@ -7,6 +7,7 @@
 #import "crc32.h"
 #import "EMVTags.h"
 #import "EMVPrivateTags.h"
+#import "ProgressViewController.h"
 
 @implementation RCTMPos
 
