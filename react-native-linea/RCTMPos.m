@@ -71,28 +71,49 @@ RCT_EXPORT_METHOD(emv2Init) {
     [self initEmv];
 }
 
+static int getConfigurationVesrsion(NSData *configuration)
+{
+    NSArray *arr=[TLV decodeTags:configuration];
+    if(!arr)
+        return 0;
+    for (TLV *tag in arr)
+    {
+        if(tag.tag==0xE4)
+        {
+            TLV *cfgtag=[TLV findLastTag:0xC1 tags:[TLV decodeTags:tag.data]];
+            
+            const uint8_t *data=cfgtag.data.bytes;
+            int ver=(data[0]<<24)|(data[1]<<16)|(data[2]<<8)|(data[3]<<0);
+
+            if(ver==0)
+                ver=calculateConfigurationChecksum(configuration);
+
+            return ver;
+        }
+    }
+    return 0;
+}
+
  -(void) initEmv
  {
      // universal = false, linea = true;
     NSError *error=nil;
     linea = [DTDevices sharedDevice];
     DTEMV2Info *info=[linea emv2GetInfo:nil];
-    [self sendDebug:info];
 
     if (info) {
-    bool universal=[linea getSupportedFeature:FEAT_EMVL2_KERNEL error:nil]&EMV_KERNEL_UNIVERSAL;
-    bool lin = linea.deviceType==DEVICE_TYPE_LINEA;
+        bool universal=[linea getSupportedFeature:FEAT_EMVL2_KERNEL error:nil]&EMV_KERNEL_UNIVERSAL;
+        bool lin = linea.deviceType==DEVICE_TYPE_LINEA;
 
+        NSData *configContactless=[Config paymentGetConfigurationFromXML:@"contactless_linea.xml"];
 
-    NSData *configContactless=[Config paymentGetConfigurationFromXML:@"contactless_linea.xml"];
-
-    if(info.contactlessConfigurationVersion!=getConfigurationVesrsion(configContactless))
-    {
-        RF_COMMAND(@"EMV Load Contactless Configuration",[dtdev emv2LoadContactlessConfiguration:configContactless configurationIndex:0 error:&error]);
-        //the idea here - load both "normal" configuration in slot 0 and in slot 1 load modified "always reject" config used for void/returns when you want to always decline just to get the data
-        configContactless=[dtdev emv2CreatePANConfiguration:configContactless error:nil];
-        [dtdev emv2LoadContactlessConfiguration:configContactless configurationIndex:1 error:nil];  //don't check for failure, in order to work on older firmwares
-    }
+        if(info.contactlessConfigurationVersion!=getConfigurationVesrsion(configContactless))
+        {
+            RF_COMMAND(@"EMV Load Contactless Configuration",[linea emv2LoadContactlessConfiguration:configContactless configurationIndex:0 error:&error]);
+            //the idea here - load both "normal" configuration in slot 0 and in slot 1 load modified "always reject" config used for void/returns when you want to always decline just to get the data
+            configContactless=[linea emv2CreatePANConfiguration:configContactless error:nil];
+            [linea emv2LoadContactlessConfiguration:configContactless configurationIndex:1 error:nil];  //don't check for failure, in order to work on older firmwares
+        }
 
     }
 
