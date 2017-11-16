@@ -195,7 +195,6 @@ static int getConfigurationVesrsion(NSData *configuration)
 
 -(void)onEMVTransaction:(id)sender
 {
-    [progressViewController updateText:@"Use payment card to initiate transaction"];
     [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
 
     if(![RCTMPos emv2Init] || ![self emv2StartTransaction])
@@ -204,6 +203,65 @@ static int getConfigurationVesrsion(NSData *configuration)
     }
 }
 
+// nice to haves
 
+// -(void)viewWillAppear:(BOOL)animated
+// {
+//     [super viewWillAppear:animated];
+    
+//     linea=[DTDevices sharedDevice];
+//     [linea addDelegate:self];
+// }
+
+// -(void)viewWillDisappear:(BOOL)animated
+// {
+//     [super viewWillDisappear:animated];
+    
+//     [linea removeDelegate:self];
+//     [linea emv2CancelTransaction:nil];
+//     [linea emv2Deinitialise:nil];
+//     [progressViewController.view removeFromSuperview];
+// }
+
+// -(void)viewDidLoad
+// {
+//     [super viewDidLoad];
+// }
+
+// - (void)viewWillAppear:(BOOL)animated
+// {
+//     [super viewWillAppear:animated];
+//     [infoText setText:@"Operation in progress, please wait..."];
+//     [phaseLabel setHidden:TRUE];
+//     [progressProgress setHidden:TRUE];
+// 	[activityIndicator startAnimating];
+// }
+// - (void)viewWillDisappear: (BOOL)animated
+// {
+//     [super viewWillDisappear:animated];
+// 	[activityIndicator stopAnimating];
+// }
+
+// - (void)updateText:(NSString *)text
+// {
+//     if([[NSThread currentThread] isMainThread])
+//     {
+//         [infoText setText:text];
+//     }else
+//     {
+//         dispatch_async(dispatch_get_main_queue(), ^{
+//             [infoText setText:text];
+//         });
+//     }
+// }
+
+// - (void)updateProgress:(NSString *)phase progress:(int)progress
+// {
+//     [phaseLabel setText:phase];
+//     [progressProgress setProgress:(float)progress/100];
+    
+//     [phaseLabel setHidden:FALSE];
+//     [progressProgress setHidden:FALSE];
+// }
 
 @end
