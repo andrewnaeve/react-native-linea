@@ -190,4 +190,41 @@ static int getConfigurationVesrsion(NSData *configuration)
     return true;
 }
 
+-(void)onEMVTransaction:(id)sender
+{
+    [progressViewController viewWillAppear:FALSE];
+    [self.view addSubview:progressViewController.view];
+    [progressViewController updateText:@"Use payment card to initiate transaction"];
+    [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+
+    if(![EMV2ViewController emv2Init] || ![self emv2StartTransaction])
+    {
+        [dtdev emv2Deinitialise:nil];
+        [progressViewController.view removeFromSuperview];
+    }
+}
+
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    
+    dtdev=[DTDevices sharedDevice];
+    [dtdev addDelegate:self];
+}
+
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    
+    [dtdev removeDelegate:self];
+    [dtdev emv2CancelTransaction:nil];
+    [dtdev emv2Deinitialise:nil];
+    [progressViewController.view removeFromSuperview];
+}
+
+-(void)viewDidLoad
+{
+    [super viewDidLoad];
+}
+
 @end
