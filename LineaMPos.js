@@ -15,6 +15,10 @@ export default class LineaMPos {
 		MPos.initEmv();
 	}
 
+	initSC() {
+		MPos.initSmartCard();
+	}
+
 	addConnectionStateListener(callback) {
 		return this.evt.addListener('connectionState', data => {
 			if (data === 'connected') {

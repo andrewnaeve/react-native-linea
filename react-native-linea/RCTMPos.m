@@ -74,18 +74,17 @@ RCT_EXPORT_METHOD(connect) {
 
  // EMV2 Init
 RCT_EXPORT_METHOD(initEmv) {
+    [self emv2Init];
+}
+
+RCT_EXPORT_METHOD(initSmartCard) {
     linea = [DTDevices sharedDevice];
     [linea setDelegate:self];
-    [self emv2Init];
     [linea scInit:SLOT_MAIN error:nil];
     [linea scCardPowerOn:SLOT_MAIN error:nil];
 }
 
-// //  void displayAlert(NSString *title, NSString *message)
-// //  {
-// //      UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title message:message delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
-// //      [alert show];
-// //  }
+
 
 #define RF_COMMAND(operation,c) {if(!c){displayAlert(@"Operation failed!", [NSString stringWithFormat:@"%@ failed, error %@, code: %d",operation,error.localizedDescription,(int)error.code]); return false;} }
 
