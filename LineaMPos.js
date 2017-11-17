@@ -30,7 +30,7 @@ export default class LineaMPos {
 	}
 
 	addSmartCardInsertedListener(callback) {
-		return this.evt.addListener('emvTransactionStarted', data => {
+		return this.evt.addListener('smartCardInserted', data => {
 			callback(data);
 		});
 	}
