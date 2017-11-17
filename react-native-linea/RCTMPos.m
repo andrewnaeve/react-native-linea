@@ -40,7 +40,7 @@ RCT_EXPORT_MODULE();
 }
 
 - (void)smartCardInserted:(SC_SLOTS)slot {
-    [self sendEventWithName:@"smartCardInserted" body:@"smart card inserted: %@", slot];
+    [self sendEventWithName:@"smartCardInserted" body:@"smart card inserted"];
 }
 
 - (void)emv2OnTransactionStarted {
