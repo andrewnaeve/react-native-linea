@@ -39,8 +39,8 @@ RCT_EXPORT_MODULE();
     [self sendEventWithName:@"debug" body:debug];
 }
 
-- (void)smartCardInserted {
-    [self sendEventWithName:@"smartCardInserted" body:@"smart card inserted"];
+- (void)smartCardInserted:(SC_SLOTS)slot {
+    [self sendEventWithName:@"smartCardInserted" body:@"smart card inserted: %@", slot];
 }
 
 - (void)emv2OnTransactionStarted {
