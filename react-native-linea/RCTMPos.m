@@ -9,6 +9,8 @@
 #import "EMVPrivateTags.h"
 #import "ProgressViewController.h"
 
+#import "Emv2ViewController.h"
+
 @implementation RCTMPos
 
 @synthesize bridge = _bridge;
@@ -24,6 +26,8 @@ RCT_EXPORT_MODULE();
 - (NSArray<NSString *> *)supportedEvents {
     return @[
                 @"connectionState",
+                @"emvTransactionStarted",
+                @"smartCardInserted",
                 @"debug"
             ];
 }
@@ -37,6 +41,15 @@ RCT_EXPORT_MODULE();
 - (void)sendDebug:(NSString *)debug {
     [self sendEventWithName:@"debug" body:debug];
 }
+
+- (void)smartCardInserted {
+    [self sendEventWithName:@"smartCardInserted" body:@"smart card inserted"];
+}
+
+- (void)emv2OnTransactionStarted {
+    [self sendEventWithName:@"emvTransactionStarted" body:@"transaction started"];
+}
+
 
 - (void)connectionState:(int)state {
     switch (state) {
@@ -63,205 +76,142 @@ RCT_EXPORT_METHOD(connect) {
 }
 
  // EMV2 Init
-
- void displayAlert(NSString *title, NSString *message)
- {
-     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title message:message delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
-     [alert show];
- }
-
- #define RF_COMMAND(operation,c) {if(!c){displayAlert(@"Operation failed!", [NSString stringWithFormat:@"%@ failed, error %@, code: %d",operation,error.localizedDescription,(int)error.code]); return false;} }
-
 RCT_EXPORT_METHOD(emvInit) {
     [self emv2Init];
 }
 
-static uint32_t calculateConfigurationChecksum(NSData *config)
-{
-    NSArray<TLV *> *tags=[TLV decodeTags:config];
-
-    CC_CRC32_CTX crc;
-    CC_CRC32_Init(&crc);
-
-    for (TLV *t in tags) {
-        if(t.tag!=0xE4)
-        {
-            CC_CRC32_Update(&crc, t.bytes, t.data.length);
-        }
-    }
-
-    uint8_t r[4];
-
-    CC_CRC32_Final(r, &crc);
-
-    return crc.crc;
-}
-
-static int getConfigurationVesrsion(NSData *configuration)
-{
-    NSArray *arr=[TLV decodeTags:configuration];
-    if(!arr)
-        return 0;
-    for (TLV *tag in arr)
-    {
-        if(tag.tag==0xE4)
-        {
-            TLV *cfgtag=[TLV findLastTag:0xC1 tags:[TLV decodeTags:tag.data]];
-            
-            const uint8_t *data=cfgtag.data.bytes;
-            int ver=(data[0]<<24)|(data[1]<<16)|(data[2]<<8)|(data[3]<<0);
-
-            if(ver==0)
-                ver=calculateConfigurationChecksum(configuration);
-
-            return ver;
-        }
-    }
-    return 0;
-}
-
- -(BOOL) emv2Init
- {
-     // universal = false, linea = true;
-    NSError *error=nil;
+RCT_EXPORT_METHOD(smartCardInit) {
     linea = [DTDevices sharedDevice];
-    DTEMV2Info *info=[linea emv2GetInfo:nil];
-
-    if (info) {
-        // bool universal=[linea getSupportedFeature:FEAT_EMVL2_KERNEL error:nil]&EMV_KERNEL_UNIVERSAL;
-        // bool lin = linea.deviceType==DEVICE_TYPE_LINEA;
-        NSData *configContactless=[Config paymentGetConfigurationFromXML:@"contactless_linea.xml"];
-        if(info.contactlessConfigurationVersion!=getConfigurationVesrsion(configContactless))
-        {
-            RF_COMMAND(@"EMV Load Contactless Configuration",[linea emv2LoadContactlessConfiguration:configContactless configurationIndex:0 error:&error]);
-            //the idea here - load both "normal" configuration in slot 0 and in slot 1 load modified "always reject" config used for void/returns when you want to always decline just to get the data
-            configContactless=[linea emv2CreatePANConfiguration:configContactless error:nil];
-            [linea emv2LoadContactlessConfiguration:configContactless configurationIndex:1 error:nil];  //don't check for failure, in order to work on older firmwares
-        }
-
-    }
-    return true;
- }
-
- -(BOOL)emv2StartTransaction
- {
-    NSError *error=nil;
-    //overwrite terminal capabilities flag depending on the connected device
-    NSData *initData=nil;
-    TLV *tag9f33=nil;
-    if([linea getSupportedFeature:FEAT_PIN_ENTRY error:nil]==FEAT_SUPPORTED)
-    {//pinpad
-        tag9f33=[TLV tlvWithHexString:@"60 B0 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
-        //            tag9f33=[TLV tlvWithHexString:@"60 60 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
-    }else
-    {//linea
-        tag9f33=[TLV tlvWithHexString:@"40 28 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
-    }
-    TLV *tag9f66=[TLV tlvWithHexString:@"36 20 40 00" tag:0x9f66];
-
-    //enable cvv on manual card entry
-    TLV *tagCVVEnabled=[TLV tlvWithHexString:@"01" tag:TAG_C1_CVV_ENABLED];
-
-    //disable pan luhn check on manual entry
-    TLV *tagPANCheckDisabled=[TLV tlvWithHexString:@"01" tag:0xCA];
-
-    //change decimal separator to .
-    TLV *tagDecimalSeparator=[TLV tlvWithString:@" " tag:TAG_C2_DECIMAL_SEPARATOR];
-
-    tag9f33=[TLV tlvWithHexString:@"E0 10 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
-
-    //enable application priority selection
-    TLV *tagC8=[TLV tlvWithHexString:@"01" tag:0xC8];
-
-    //enable apple VAS
-    TLV *tagCD=[TLV tlvWithHexString:@"01" tag:0xCD];
-
-    initData=[TLV encodeTags:@[tagCVVEnabled, tagDecimalSeparator, tagC8, tagCD, tagPANCheckDisabled]];
-
-    [linea emv2SetMessageForID:EMV_UI_ERROR_PROCESSING font:FONT_8X16 message:nil error:nil]; //disable transaction error
-
-    if([linea getSupportedFeature:FEAT_PIN_ENTRY error:nil]==FEAT_SUPPORTED)
-        [linea emv2SetPINOptions:PIN_ENTRY_DISABLED error:nil];
-    else
-        [linea emv2SetPINOptions:PIN_ENTRY_DISABLED error:nil];
-
-    //amount: $1.00, currency code: USD(840), according to ISO 4217
-    RF_COMMAND(@"EMV Init",[linea emv2SetTransactionType:0 amount:100 currencyCode:840 error:&error]);
-    //start the transaction, transaction steps will be notified via emv2On... delegate methods
-    RF_COMMAND(@"EMV Start Transaction",[linea emv2StartTransactionOnInterface:EMV_INTERFACE_CONTACT|EMV_INTERFACE_CONTACTLESS|EMV_INTERFACE_MAGNETIC|EMV_INTERFACE_MAGNETIC_MANUAL flags:0 initData:initData timeout:7*60 error:&error]);
-
-    return true;
+    [linea setDelegate:self];
+    [linea scInit:SLOT_MAIN error:nil];
+    [linea scCardPowerOn:SLOT_MAIN error:nil];
 }
 
--(void)onEMVTransaction:(id)sender
-{
-    [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+// //  void displayAlert(NSString *title, NSString *message)
+// //  {
+// //      UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title message:message delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+// //      [alert show];
+// //  }
 
-    if(![self emv2Init] || ![self emv2StartTransaction])
-    {
-        [linea emv2Deinitialise:nil];
-    }
-}
+// //  #define RF_COMMAND(operation,c) {if(!c){displayAlert(@"Operation failed!", [NSString stringWithFormat:@"%@ failed, error %@, code: %d",operation,error.localizedDescription,(int)error.code]); return false;} }
 
-// nice to haves
 
-// -(void)viewWillAppear:(BOOL)animated
-// {
-//     [super viewWillAppear:animated];
-    
-//     linea=[DTDevices sharedDevice];
-//     [linea addDelegate:self];
-// }
+// // static uint32_t calculateConfigurationChecksum(NSData *config)
+// // {
+// //     NSArray<TLV *> *tags=[TLV decodeTags:config];
 
-// -(void)viewWillDisappear:(BOOL)animated
-// {
-//     [super viewWillDisappear:animated];
-    
-//     [linea removeDelegate:self];
-//     [linea emv2CancelTransaction:nil];
-//     [linea emv2Deinitialise:nil];
-//     [progressViewController.view removeFromSuperview];
-// }
+// //     CC_CRC32_CTX crc;
+// //     CC_CRC32_Init(&crc);
 
-// -(void)viewDidLoad
-// {
-//     [super viewDidLoad];
-// }
+// //     for (TLV *t in tags) {
+// //         if(t.tag!=0xE4)
+// //         {
+// //             CC_CRC32_Update(&crc, t.bytes, t.data.length);
+// //         }
+// //     }
 
-// - (void)viewWillAppear:(BOOL)animated
-// {
-//     [super viewWillAppear:animated];
-//     [infoText setText:@"Operation in progress, please wait..."];
-//     [phaseLabel setHidden:TRUE];
-//     [progressProgress setHidden:TRUE];
-// 	[activityIndicator startAnimating];
-// }
-// - (void)viewWillDisappear: (BOOL)animated
-// {
-//     [super viewWillDisappear:animated];
-// 	[activityIndicator stopAnimating];
-// }
+// //     uint8_t r[4];
 
-// - (void)updateText:(NSString *)text
-// {
-//     if([[NSThread currentThread] isMainThread])
-//     {
-//         [infoText setText:text];
-//     }else
-//     {
-//         dispatch_async(dispatch_get_main_queue(), ^{
-//             [infoText setText:text];
-//         });
+// //     CC_CRC32_Final(r, &crc);
+
+// //     return crc.crc;
+// // }
+
+// // static int getConfigurationVesrsion(NSData *configuration)
+// // {
+// //     NSArray *arr=[TLV decodeTags:configuration];
+// //     if(!arr)
+// //         return 0;
+// //     for (TLV *tag in arr)
+// //     {
+// //         if(tag.tag==0xE4)
+// //         {
+// //             TLV *cfgtag=[TLV findLastTag:0xC1 tags:[TLV decodeTags:tag.data]];
+            
+// //             const uint8_t *data=cfgtag.data.bytes;
+// //             int ver=(data[0]<<24)|(data[1]<<16)|(data[2]<<8)|(data[3]<<0);
+
+// //             if(ver==0)
+// //                 ver=calculateConfigurationChecksum(configuration);
+
+// //             return ver;
+// //         }
+// //     }
+// //     return 0;
+// // }
+
+//  -(BOOL) emv2Init
+//  {
+//      // universal = false, linea = true;
+//     NSError *error=nil;
+//     linea = [DTDevices sharedDevice];
+//     DTEMV2Info *info=[linea emv2GetInfo:nil];
+
+//     if (info) {
+//         // bool universal=[linea getSupportedFeature:FEAT_EMVL2_KERNEL error:nil]&EMV_KERNEL_UNIVERSAL;
+//         // bool lin = linea.deviceType==DEVICE_TYPE_LINEA;
+//         NSData *configContactless=[Config paymentGetConfigurationFromXML:@"contactless_linea.xml"];
+//         if(info.contactlessConfigurationVersion!=getConfigurationVesrsion(configContactless))
+//         {
+//             RF_COMMAND(@"EMV Load Contactless Configuration",[linea emv2LoadContactlessConfiguration:configContactless configurationIndex:0 error:&error]);
+//             //the idea here - load both "normal" configuration in slot 0 and in slot 1 load modified "always reject" config used for void/returns when you want to always decline just to get the data
+//             configContactless=[linea emv2CreatePANConfiguration:configContactless error:nil];
+//             [linea emv2LoadContactlessConfiguration:configContactless configurationIndex:1 error:nil];  //don't check for failure, in order to work on older firmwares
+//         }
+
 //     }
+//     return true;
+//  }
+
+//  -(BOOL)emv2StartTransaction
+//  {
+//     NSError *error=nil;
+//     //overwrite terminal capabilities flag depending on the connected device
+//     NSData *initData=nil;
+//     TLV *tag9f33=nil;
+//     if([linea getSupportedFeature:FEAT_PIN_ENTRY error:nil]==FEAT_SUPPORTED)
+//     {//pinpad
+//         tag9f33=[TLV tlvWithHexString:@"60 B0 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
+//         //            tag9f33=[TLV tlvWithHexString:@"60 60 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
+//     }else
+//     {//linea
+//         tag9f33=[TLV tlvWithHexString:@"40 28 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
+//     }
+//     TLV *tag9f66=[TLV tlvWithHexString:@"36 20 40 00" tag:0x9f66];
+
+//     //enable cvv on manual card entry
+//     TLV *tagCVVEnabled=[TLV tlvWithHexString:@"01" tag:TAG_C1_CVV_ENABLED];
+
+//     //disable pan luhn check on manual entry
+//     TLV *tagPANCheckDisabled=[TLV tlvWithHexString:@"01" tag:0xCA];
+
+//     //change decimal separator to .
+//     TLV *tagDecimalSeparator=[TLV tlvWithString:@" " tag:TAG_C2_DECIMAL_SEPARATOR];
+
+//     tag9f33=[TLV tlvWithHexString:@"E0 10 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
+
+//     //enable application priority selection
+//     TLV *tagC8=[TLV tlvWithHexString:@"01" tag:0xC8];
+
+//     //enable apple VAS
+//     TLV *tagCD=[TLV tlvWithHexString:@"01" tag:0xCD];
+
+//     initData=[TLV encodeTags:@[tagCVVEnabled, tagDecimalSeparator, tagC8, tagCD, tagPANCheckDisabled]];
+
+//     [linea emv2SetMessageForID:EMV_UI_ERROR_PROCESSING font:FONT_8X16 message:nil error:nil]; //disable transaction error
+
+//     if([linea getSupportedFeature:FEAT_PIN_ENTRY error:nil]==FEAT_SUPPORTED)
+//         [linea emv2SetPINOptions:PIN_ENTRY_DISABLED error:nil];
+//     else
+//         [linea emv2SetPINOptions:PIN_ENTRY_DISABLED error:nil];
+
+//     //amount: $1.00, currency code: USD(840), according to ISO 4217
+//     RF_COMMAND(@"EMV Init",[linea emv2SetTransactionType:0 amount:100 currencyCode:840 error:&error]);
+//     //start the transaction, transaction steps will be notified via emv2On... delegate methods
+//     RF_COMMAND(@"EMV Start Transaction",[linea emv2StartTransactionOnInterface:EMV_INTERFACE_CONTACT|EMV_INTERFACE_CONTACTLESS|EMV_INTERFACE_MAGNETIC|EMV_INTERFACE_MAGNETIC_MANUAL flags:0 initData:initData timeout:7*60 error:&error]);
+
+//     return true;
 // }
 
-// - (void)updateProgress:(NSString *)phase progress:(int)progress
-// {
-//     [phaseLabel setText:phase];
-//     [progressProgress setProgress:(float)progress/100];
-    
-//     [phaseLabel setHidden:FALSE];
-//     [progressProgress setHidden:FALSE];
-// }
 
 @end

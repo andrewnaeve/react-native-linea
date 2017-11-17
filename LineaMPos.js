@@ -25,6 +25,18 @@ export default class LineaMPos {
 		});
 	}
 
+	addSmartCardInsertedListener(callback) {
+		return this.evt.addListener('emvTransactionStarted', data => {
+			callback(data);
+		});
+	}
+
+	addTransactionStartedListener(callback) {
+		return this.evt.addListener('emvTransactionStarted', data => {
+			callback(data);
+		});
+	}
+
 	addDebugListener(callback) {
 		return this.evt.addListener('debug', data => {
 			console.log('debug:', data);
