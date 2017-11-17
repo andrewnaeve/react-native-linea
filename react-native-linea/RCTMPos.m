@@ -7,9 +7,6 @@
 #import "crc32.h"
 #import "EMVTags.h"
 #import "EMVPrivateTags.h"
-#import "ProgressViewController.h"
-
-#import "Emv2ViewController.h"
 
 @implementation RCTMPos
 
@@ -150,7 +147,7 @@ static int getConfigurationVesrsion(NSData *configuration)
         NSData *configContactless=[Config paymentGetConfigurationFromXML:@"contactless_linea.xml"];
         if(info.contactlessConfigurationVersion!=getConfigurationVesrsion(configContactless))
         {
-            RF_COMMAND(@"EMV Load Contactless Configuration",[linea emv2LoadContactlessConfiguration:configContactless configurationIndex:0 error:&error]);
+           [linea emv2LoadContactlessConfiguration:configContactless configurationIndex:0 error:&error];
             //the idea here - load both "normal" configuration in slot 0 and in slot 1 load modified "always reject" config used for void/returns when you want to always decline just to get the data
             configContactless=[linea emv2CreatePANConfiguration:configContactless error:nil];
             [linea emv2LoadContactlessConfiguration:configContactless configurationIndex:1 error:nil];  //don't check for failure, in order to work on older firmwares
