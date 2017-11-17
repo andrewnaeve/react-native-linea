@@ -73,7 +73,7 @@ RCT_EXPORT_METHOD(connect) {
 }
 
  // EMV2 Init
-RCT_EXPORT_METHOD(init) {
+RCT_EXPORT_METHOD(initEmv) {
     linea = [DTDevices sharedDevice];
     [linea setDelegate:self];
     [self emv2Init];

@@ -12,7 +12,7 @@ export default class LineaMPos {
 	}
 
 	initialize() {
-		MPos.init();
+		MPos.initEmv();
 	}
 
 	addConnectionStateListener(callback) {
