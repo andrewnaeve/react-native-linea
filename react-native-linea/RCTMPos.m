@@ -52,11 +52,24 @@ RCT_EXPORT_MODULE();
 }
 
 -(void)emv2OnOnlineProcessing:(NSData *)data {
+    [self encryptedTagsDemo];
+    //called when the kernel wants an approval online from the server, encapsulate the server response tags
+    //in tag 0xE6 and set the server communication success or fail in tag C2
+    
+    //for the demo fake a successful server response (30 30)
+    NSData *serverResponse=[TLV encodeTags:@[[TLV tlvWithHexString:@"30 30" tag:TAG_8A_AUTH_RESP_CODE]]];
+    NSData *response=[TLV encodeTags:@[[TLV tlvWithHexString:@"01" tag:0xC2],[TLV tlvWithData:serverResponse tag:0xE6]]];
+    [linea emv2SetOnlineResult:response error:nil];
+
     [self sendEventWithName:@"debug" body:@"on online processing"];
 }
 
 -(void)emv2OnApplicationSelection:(NSData *)applicationTags {
     [self sendEventWithName:@"debug" body:@"select application"];
+}
+
+-(void)emv2OnTransactionFinished:(NSData *)data {
+    [self sendEventWithName:@"debug" body:@"transaction finished"];
 }
 
 - (void)connectionState:(int)state {
@@ -214,10 +227,88 @@ static int getConfigurationVesrsion(NSData *configuration)
     //amount: $1.00, currency code: USD(840), according to ISO 4217
     [linea emv2SetTransactionType:0 amount:100 currencyCode:840 error:&error];
     //start the transaction, transaction steps will be notified via emv2On... delegate methods
-    [linea emv2StartTransactionOnInterface:EMV_INTERFACE_CONTACT|EMV_INTERFACE_CONTACTLESS|EMV_INTERFACE_MAGNETIC|EMV_INTERFACE_MAGNETIC_MANUAL flags:0 initData:initData timeout:7*60 error:&error];
-    [self sendEventWithName:@"debug" body:&error.localizedDescription];
+    [linea emv2StartTransactionOnInterface:EMV_INTERFACE_CONTACT flags:0 initData:initData timeout:7*60 error:&error];
+
     return true;
 }
+
+-(void)encryptedTagsDemo
+{
+    NSError *error;
+    
+    NSData *tagList = [TLV encodeTagList:@[
+                                           [NSNumber numberWithInt:0x56], //track1
+                                           [NSNumber numberWithInt:0x57], //track2
+                                           [NSNumber numberWithInt:0x5A], //pan
+                                           [NSNumber numberWithInt:0x5F24], //expiration date
+                                           [NSNumber numberWithInt:0x5F20], //account name
+                                           ]];
+    
+    //get the tags encrypted with 3DES CBC and key loaded at positon 2
+    NSData *packetData=[dtdev emv2GetTagsEncrypted:tagList format:TAGS_FORMAT_DATECS keyType:KEY_TYPE_3DES_CBC keyIndex:2 packetID:0x12345678 error:&error];
+//    packetData=[dtdev emv2GetTagsPlain:tagList error:nil];
+    if(!packetData || packetData.length==0)
+        return; //no data
+    const uint8_t *packet=packetData.bytes;
+    
+    int index=0;
+    int format = (packet[index + 0] << 24) | (packet[index + 1] << 16) | (packet[index + 2] << 8) | (packet[index + 3]);
+    if(format!=TAGS_FORMAT_DATECS)
+        return; //wrong format
+    index += 4;
+    
+    //try to decrypt the packet
+    NSData *encrypted=[NSData dataWithBytes:&packet[index] length:packetData.length-index];
+    
+    static uint8_t tridesKey[16]={0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF, 0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10};
+//    uint8_t tridesKey[16]={0x31,0x31,0x31,0x31,0x31,0x31,0x31,0x31,0x31,0x31,0x31,0x31,0x31,0x31,0x31,0x31};
+
+    uint8_t decrypted[1024];
+    trides_crypto(kCCDecrypt,0,encrypted.bytes,encrypted.length,decrypted,tridesKey);
+
+    
+    //parse and verify the data
+    index = 0;
+    
+    format = (decrypted[index + 0] << 24) | (decrypted[index + 1] << 16) | (decrypted[index + 2] << 8) | (decrypted[index + 3]);
+    index += 4;
+    
+    int dataLen = (decrypted[index + 0] << 8) | (decrypted[index + 1]) - 4 - 4 - 16;
+    if(dataLen<0 || dataLen>encrypted.length)
+        return; //invalid length
+    index += 2;
+    int hashStart = index;
+    
+    int packetID = (decrypted[index + 0] << 24) | (decrypted[index + 1] << 16) | (decrypted[index + 2] << 8) | (decrypted[index + 3]);
+    index += 4;
+    
+    index += 4;
+    
+    NSData *sn=[NSData dataWithBytes:&decrypted[index] length:16];
+    index += sn.length;
+    
+    NSData *tags=[NSData dataWithBytes:&decrypted[index] length:dataLen];
+    index += tags.length;
+    int hashEnd = index;
+  
+    NSData *hashPacket=[NSData dataWithBytes:&decrypted[index] length:32];
+    index += hashPacket.length;
+    
+    uint8_t hash[32];
+    CC_SHA256(&decrypted[hashStart],hashEnd-hashStart,hash);
+    index+=CC_SHA256_DIGEST_LENGTH;
+    
+    NSData *hashComputed=[NSData dataWithBytes:hash length:sizeof(hash)];
+    
+    if(![hashPacket isEqualToData:hashComputed])
+        return; //invalid packet checksum
+    
+    //everything is valid, parse the tags now
+    NSLog(@"TLV: %@",tags);
+    NSArray *t=[TLV decodeTags:tags];
+    NSLog(@"Tags: %@",t);
+}
+
 
 
 @end
