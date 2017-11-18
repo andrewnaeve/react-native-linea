@@ -16,6 +16,7 @@
 		BC56ABBE1FBBF9FD001C7AF2 /* Config.m in Sources */ = {isa = PBXBuildFile; fileRef = BC56ABBD1FBBF9FD001C7AF2 /* Config.m */; };
 		BC56ABC11FBC0622001C7AF2 /* XMLParser.m in Sources */ = {isa = PBXBuildFile; fileRef = BC56ABC01FBC0622001C7AF2 /* XMLParser.m */; };
 		BC56ABC41FBC0692001C7AF2 /* EMVTLV.m in Sources */ = {isa = PBXBuildFile; fileRef = BC56ABC21FBC0692001C7AF2 /* EMVTLV.m */; };
+		BC9EE2911FC0FD6400AA402A /* dukpt.m in Sources */ = {isa = PBXBuildFile; fileRef = BC9EE2901FC0FD6400AA402A /* dukpt.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -63,6 +64,8 @@
 		BC7F562C1FBD39AF00B849E7 /* crc32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32.h; sourceTree = "<group>"; };
 		BC7F562D1FBD42F000B849E7 /* EMVTags.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMVTags.h; sourceTree = "<group>"; };
 		BC7F562E1FBD42F000B849E7 /* EMVPrivateTags.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMVPrivateTags.h; sourceTree = "<group>"; };
+		BC9EE28F1FC0FD6400AA402A /* dukpt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dukpt.h; sourceTree = "<group>"; };
+		BC9EE2901FC0FD6400AA402A /* dukpt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dukpt.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +107,8 @@
 				BC7F562C1FBD39AF00B849E7 /* crc32.h */,
 				BC56AB8D1FBBCD87001C7AF2 /* RCTMPos.h */,
 				BC56AB8E1FBBCD87001C7AF2 /* RCTMPos.m */,
+				BC9EE28F1FC0FD6400AA402A /* dukpt.h */,
+				BC9EE2901FC0FD6400AA402A /* dukpt.m */,
 				17B4ECE31E16B80000E47CA5 /* DTDevices.h */,
 				17B4EBEE1E165D3B00E47CA5 /* RCTLinea.h */,
 				17B4EBEF1E165D3B00E47CA5 /* RCTLinea.m */,
@@ -204,6 +209,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BC9EE2911FC0FD6400AA402A /* dukpt.m in Sources */,
 				BC56ABC41FBC0692001C7AF2 /* EMVTLV.m in Sources */,
 				BC56ABC11FBC0622001C7AF2 /* XMLParser.m in Sources */,
 				BC56AB8F1FBBCD87001C7AF2 /* RCTMPos.m in Sources */,
