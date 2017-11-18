@@ -9,14 +9,14 @@ size_t trides_crypto(int operation, int mode, const void *data, size_t length, v
     memmove(&fullKey[16],&key[0],8);    
     
     size_t storedBytes=0;
-    if(kCCSuccess!=CCCrypt(operation,kCCAlgorithm3DES,mode,fullKey,kCCKeySize3DES,nil,data,length,(void *)result,512,&storedBytes))
+    if(kCCSuccess!=CCCrypt(operation,kCCAlgorithm3DES,mode,fullKey,kCCKeySize3DES,NULL,data,length,(void *)result,512,&storedBytes))
         return 0;
     return storedBytes;
 }
 static size_t des_crypto(int operation, const void *data, size_t length, void *result, const void *key)
 {
     size_t storedBytes=0;
-    if(kCCSuccess!=CCCrypt(operation,kCCAlgorithmDES,kCCOptionECBMode,key,kCCKeySizeDES,nil,data,length,(void *)result,512,&storedBytes))
+    if(kCCSuccess!=CCCrypt(operation,kCCAlgorithmDES,kCCOptionECBMode,key,kCCKeySizeDES,NULL,data,length,(void *)result,512,&storedBytes))
         return 0;
     return storedBytes;
 }

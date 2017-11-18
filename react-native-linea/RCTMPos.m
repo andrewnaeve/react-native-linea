@@ -1,3 +1,4 @@
+#import <CommonCrypto/CommonDigest.h>
 #import "RCTMPos.h"
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventDispatcher.h>
@@ -246,7 +247,7 @@ static int getConfigurationVesrsion(NSData *configuration)
                                            ]];
     
     //get the tags encrypted with 3DES CBC and key loaded at positon 2
-    NSData *packetData=[dtdev emv2GetTagsEncrypted:tagList format:TAGS_FORMAT_DATECS keyType:KEY_TYPE_3DES_CBC keyIndex:2 packetID:0x12345678 error:&error];
+    NSData *packetData=[linea emv2GetTagsEncrypted:tagList format:TAGS_FORMAT_DATECS keyType:KEY_TYPE_3DES_CBC keyIndex:2 packetID:0x12345678 error:&error];
 //    packetData=[dtdev emv2GetTagsPlain:tagList error:nil];
     if(!packetData || packetData.length==0)
         return; //no data
