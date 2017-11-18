@@ -47,6 +47,13 @@ RCT_EXPORT_MODULE();
     [self sendEventWithName:@"smartCardInserted" body:@"smart card inserted"];
 }
 
+-(void)emv2OnUserInterfaceCode:(int)code status:(int)status holdTime:(NSTimeInterval)holdTime {
+    [self sendEventWithName:@"debug" body:@"ui update"];
+}
+
+-(void)emv2OnOnlineProcessing:(NSData *)data {
+    [self sendEventWithName:@"debug" body:@"on online processing"];
+}
 
 - (void)connectionState:(int)state {
     switch (state) {
