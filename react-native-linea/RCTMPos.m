@@ -55,6 +55,10 @@ RCT_EXPORT_MODULE();
     [self sendEventWithName:@"debug" body:@"on online processing"];
 }
 
+-(void)emv2OnApplicationSelection:(NSData *)applicationTags {
+    [self sendEventWithName:@"debug" body:@"select application"];
+}
+
 - (void)connectionState:(int)state {
     switch (state) {
         case CONN_CONNECTED:
@@ -167,7 +171,6 @@ static int getConfigurationVesrsion(NSData *configuration)
 
  -(BOOL)emv2StartTransaction
  {
-    [self sendEventWithName:@"debug" body:@"transaction called"];
     NSError *error=nil;
     //overwrite terminal capabilities flag depending on the connected device
     NSData *initData=nil;
@@ -212,7 +215,7 @@ static int getConfigurationVesrsion(NSData *configuration)
     [linea emv2SetTransactionType:0 amount:100 currencyCode:840 error:&error];
     //start the transaction, transaction steps will be notified via emv2On... delegate methods
     [linea emv2StartTransactionOnInterface:EMV_INTERFACE_CONTACT|EMV_INTERFACE_CONTACTLESS|EMV_INTERFACE_MAGNETIC|EMV_INTERFACE_MAGNETIC_MANUAL flags:0 initData:initData timeout:7*60 error:&error];
-
+    [self sendEventWithName:@"debug" body:&error.localizedDescription];
     return true;
 }
 
