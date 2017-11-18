@@ -15,8 +15,8 @@ export default class LineaMPos {
 		MPos.initEmv();
 	}
 
-	initSC() {
-		MPos.initSmartCard();
+	startTransaction() {
+		MPos.startTransaction();
 	}
 
 	addConnectionStateListener(callback) {

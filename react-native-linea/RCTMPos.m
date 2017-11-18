@@ -39,12 +39,12 @@ RCT_EXPORT_MODULE();
     [self sendEventWithName:@"debug" body:debug];
 }
 
-- (void)smartCardInserted:(SC_SLOTS)slot {
-    [self sendEventWithName:@"smartCardInserted" body:@"smart card inserted"];
-}
-
 - (void)emv2OnTransactionStarted {
     [self sendEventWithName:@"emvTransactionStarted" body:@"transaction started"];
+}
+
+- (void)smartCardInserted:(SC_SLOTS)slot {
+    [self sendEventWithName:@"smartCardInserted" body:@"smart card inserted"];
 }
 
 
@@ -74,14 +74,15 @@ RCT_EXPORT_METHOD(connect) {
 
  // EMV2 Init
 RCT_EXPORT_METHOD(initEmv) {
-    [self emv2Init];
-}
-
-RCT_EXPORT_METHOD(initSmartCard) {
     linea = [DTDevices sharedDevice];
     [linea setDelegate:self];
+    [self emv2Init];
     [linea scInit:SLOT_MAIN error:nil];
     [linea scCardPowerOn:SLOT_MAIN error:nil];
+}
+
+RCT_EXPORT_METHOD(startTransaction) {
+    [self emv2StartTransaction];
 }
 
 
@@ -138,6 +139,7 @@ static int getConfigurationVesrsion(NSData *configuration)
      // universal = false, linea = true;
     NSError *error=nil;
     linea = [DTDevices sharedDevice];
+    [linea emv2Initialise:&error];
     DTEMV2Info *info=[linea emv2GetInfo:nil];
 
     if (info) {
@@ -156,55 +158,55 @@ static int getConfigurationVesrsion(NSData *configuration)
     return true;
  }
 
-//  -(BOOL)emv2StartTransaction
-//  {
-//     NSError *error=nil;
-//     //overwrite terminal capabilities flag depending on the connected device
-//     NSData *initData=nil;
-//     TLV *tag9f33=nil;
-//     if([linea getSupportedFeature:FEAT_PIN_ENTRY error:nil]==FEAT_SUPPORTED)
-//     {//pinpad
-//         tag9f33=[TLV tlvWithHexString:@"60 B0 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
-//         //            tag9f33=[TLV tlvWithHexString:@"60 60 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
-//     }else
-//     {//linea
-//         tag9f33=[TLV tlvWithHexString:@"40 28 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
-//     }
-//     TLV *tag9f66=[TLV tlvWithHexString:@"36 20 40 00" tag:0x9f66];
+ -(BOOL)emv2StartTransaction
+ {
+    NSError *error=nil;
+    //overwrite terminal capabilities flag depending on the connected device
+    NSData *initData=nil;
+    TLV *tag9f33=nil;
+    if([linea getSupportedFeature:FEAT_PIN_ENTRY error:nil]==FEAT_SUPPORTED)
+    {//pinpad
+        tag9f33=[TLV tlvWithHexString:@"60 B0 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
+        //            tag9f33=[TLV tlvWithHexString:@"60 60 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
+    }else
+    {//linea
+        tag9f33=[TLV tlvWithHexString:@"40 28 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
+    }
+    TLV *tag9f66=[TLV tlvWithHexString:@"36 20 40 00" tag:0x9f66];
 
-//     //enable cvv on manual card entry
-//     TLV *tagCVVEnabled=[TLV tlvWithHexString:@"01" tag:TAG_C1_CVV_ENABLED];
+    //enable cvv on manual card entry
+    TLV *tagCVVEnabled=[TLV tlvWithHexString:@"01" tag:TAG_C1_CVV_ENABLED];
 
-//     //disable pan luhn check on manual entry
-//     TLV *tagPANCheckDisabled=[TLV tlvWithHexString:@"01" tag:0xCA];
+    //disable pan luhn check on manual entry
+    TLV *tagPANCheckDisabled=[TLV tlvWithHexString:@"01" tag:0xCA];
 
-//     //change decimal separator to .
-//     TLV *tagDecimalSeparator=[TLV tlvWithString:@" " tag:TAG_C2_DECIMAL_SEPARATOR];
+    //change decimal separator to .
+    TLV *tagDecimalSeparator=[TLV tlvWithString:@" " tag:TAG_C2_DECIMAL_SEPARATOR];
 
-//     tag9f33=[TLV tlvWithHexString:@"E0 10 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
+    tag9f33=[TLV tlvWithHexString:@"E0 10 C8" tag:TAG_9F33_TERMINAL_CAPABILITIES];
 
-//     //enable application priority selection
-//     TLV *tagC8=[TLV tlvWithHexString:@"01" tag:0xC8];
+    //enable application priority selection
+    TLV *tagC8=[TLV tlvWithHexString:@"01" tag:0xC8];
 
-//     //enable apple VAS
-//     TLV *tagCD=[TLV tlvWithHexString:@"01" tag:0xCD];
+    //enable apple VAS
+    TLV *tagCD=[TLV tlvWithHexString:@"01" tag:0xCD];
 
-//     initData=[TLV encodeTags:@[tagCVVEnabled, tagDecimalSeparator, tagC8, tagCD, tagPANCheckDisabled]];
+    initData=[TLV encodeTags:@[tagCVVEnabled, tagDecimalSeparator, tagC8, tagCD, tagPANCheckDisabled]];
 
-//     [linea emv2SetMessageForID:EMV_UI_ERROR_PROCESSING font:FONT_8X16 message:nil error:nil]; //disable transaction error
+    [linea emv2SetMessageForID:EMV_UI_ERROR_PROCESSING font:FONT_8X16 message:nil error:nil]; //disable transaction error
 
-//     if([linea getSupportedFeature:FEAT_PIN_ENTRY error:nil]==FEAT_SUPPORTED)
-//         [linea emv2SetPINOptions:PIN_ENTRY_DISABLED error:nil];
-//     else
-//         [linea emv2SetPINOptions:PIN_ENTRY_DISABLED error:nil];
+    if([linea getSupportedFeature:FEAT_PIN_ENTRY error:nil]==FEAT_SUPPORTED)
+        [linea emv2SetPINOptions:PIN_ENTRY_DISABLED error:nil];
+    else
+        [linea emv2SetPINOptions:PIN_ENTRY_DISABLED error:nil];
 
-//     //amount: $1.00, currency code: USD(840), according to ISO 4217
-//     RF_COMMAND(@"EMV Init",[linea emv2SetTransactionType:0 amount:100 currencyCode:840 error:&error]);
-//     //start the transaction, transaction steps will be notified via emv2On... delegate methods
-//     RF_COMMAND(@"EMV Start Transaction",[linea emv2StartTransactionOnInterface:EMV_INTERFACE_CONTACT|EMV_INTERFACE_CONTACTLESS|EMV_INTERFACE_MAGNETIC|EMV_INTERFACE_MAGNETIC_MANUAL flags:0 initData:initData timeout:7*60 error:&error]);
+    //amount: $1.00, currency code: USD(840), according to ISO 4217
+    [linea emv2SetTransactionType:0 amount:100 currencyCode:840 error:&error]);
+    //start the transaction, transaction steps will be notified via emv2On... delegate methods
+    [linea emv2StartTransactionOnInterface:EMV_INTERFACE_CONTACT|EMV_INTERFACE_CONTACTLESS|EMV_INTERFACE_MAGNETIC|EMV_INTERFACE_MAGNETIC_MANUAL flags:0 initData:initData timeout:7*60 error:&error]);
 
-//     return true;
-// }
+    return true;
+}
 
 
 @end
