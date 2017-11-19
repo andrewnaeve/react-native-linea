@@ -94,7 +94,7 @@ RCT_EXPORT_METHOD(startTransaction) {
 -(void)emv2OnUserInterfaceCode:(int)code status:(int)status holdTime:(NSTimeInterval)holdTime;
 {
     NSString *ui=@"";
-    NSString *uistatus=@"not provided";
+    NSString *uiStatus=@"not provided";
     switch (code)
     {
         case EMV_UI_NOT_WORKING:
@@ -167,25 +167,27 @@ RCT_EXPORT_METHOD(startTransaction) {
     switch (status)
     {
         case EMV_UI_STATUS_NOT_READY:
-            uistatus = @"Status Not Ready";
+            uiStatus = @"Status Not Ready";
             break;
         case EMV_UI_STATUS_IDLE:
-            uistatus = @"Status Idle";
+            uiStatus = @"Status Idle";
             break;
         case EMV_UI_STATUS_READY_TO_READ:
-            uistatus = @"Status Ready To Read";
+            uiStatus = @"Status Ready To Read";
             break;
         case EMV_UI_STATUS_PROCESSING:
-            uistatus = @"Status Processing";
+            uiStatus = @"Status Processing";
             break;
         case EMV_UI_STATUS_CARD_READ_SUCCESS:
-            uistatus = @"Status Card Read Success";
+            uiStatus = @"Status Card Read Success";
             break;
         case EMV_UI_STATUS_ERROR_PROCESSING:
-            uistatus = @"Status Processing";
+            uiStatus = @"Status Processing";
             break;
     }
-    [progressViewController updateText:ui];
+    NSString *uiCodeAndStatus = @"UI: %@. Status: %@", ui, uiStatus;
+    [self sendEventWithName:@"uiUpdate" body:ui];
+    [self sendEventWithName:@"uiUpdate" body:uiStatus];
 }
 
 - (void)connectionState:(int)state {
