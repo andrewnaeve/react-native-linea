@@ -388,7 +388,7 @@ static int getConfigurationVesrsion(NSData *configuration)
         //    if(issuerScriptResults)
         //        [receipt appendFormat:@"%@\n",issuerScriptResults];
         
-        if([dtdev getSupportedFeature:FEAT_PRINTING error:nil])
+        if([linea getSupportedFeature:FEAT_PRINTING error:nil])
         {
             [linea prnPrintText:@"{+B}{=C}TRANSACTION COMPLETE" error:nil];
             [linea prnPrintText:receipt error:nil];
@@ -397,8 +397,9 @@ static int getConfigurationVesrsion(NSData *configuration)
         
         [receipt insertString:[NSString stringWithFormat:@"nEMVCards: %d, success: %d, failed: %d\n",nRFCards,nRFCardSuccess,nRFCards-nRFCardSuccess] atIndex:0];
         
-        
-        displayAlert(@"Transaction complete!", receipt);
+        [self sendEventWithName:@"debug" body:@"transaction complete"];
+        [self sendEventWithName:@"debug" body:receipt];
+        // displayAlert(@"Transaction complete!", receipt);
     }else
     {
         NSString *reasonMessage=@"Terminal declined";
@@ -412,7 +413,8 @@ static int getConfigurationVesrsion(NSData *configuration)
             if(reason==REASON_TIMEOUT)
                 reasonMessage=@"Transaction timed out";
         }
-        displayAlert(@"Transaction failed!", reasonMessage);
+        // displayAlert(@"Transaction failed!", reasonMessage);
+        [self sendEventWithName:@"debug" body:@"transaction declined"];
     }
 }
 
