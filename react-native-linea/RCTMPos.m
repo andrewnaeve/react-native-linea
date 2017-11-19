@@ -1,3 +1,6 @@
+static int nRFCards=0;
+static int nRFCardSuccess=0;
+
 #import <CommonCrypto/CommonDigest.h>
 #import "RCTMPos.h"
 #import <React/RCTBridgeModule.h>
@@ -69,10 +72,6 @@ RCT_EXPORT_MODULE();
 
 -(void)emv2OnApplicationSelection:(NSData *)applicationTags {
     [self sendEventWithName:@"debug" body:@"select application"];
-}
-
--(void)emv2OnTransactionFinished:(NSData *)data {
-    [self sendEventWithName:@"debug" body:@"transaction finished"];
 }
 
 - (void)connectionState:(int)state {
@@ -237,18 +236,17 @@ static int getConfigurationVesrsion(NSData *configuration)
 
 -(void)emv2OnTransactionFinished:(NSData *)data;
 {
-    [progressViewController.view removeFromSuperview];
     
     NSLog(@"emv2OnTransactionFinished: %@",data);
     
     //try to get some encrypted tags and decrypt them
     [self encryptedTagsDemo];
     
-    [self performSelector:@selector(updateDisplay) withObject:nil afterDelay:1.5];
+    
     if(!data)
     {
-        [dtdev emv2Deinitialise:nil];
-        displayAlert(@"Error", @"Transaction could not be completed!");
+        [linea emv2Deinitialise:nil];
+        [self sendEventWithName:@"debug" body:@"Transaction could not be completed"];
         return;
     }
     
@@ -262,7 +260,7 @@ static int getConfigurationVesrsion(NSData *configuration)
     NSString *t2Masked=nil;
     
     NSArray *tags=[TLV decodeTags:data];
-    logView.text=[NSString stringWithFormat:@"Final tags:\n%@",tags];
+    // logView.text=[NSString stringWithFormat:@"Final tags:\n%@",tags];
     
     TLV *t;
     
@@ -353,7 +351,7 @@ static int getConfigurationVesrsion(NSData *configuration)
         [receipt appendFormat:@"Transaction Type: %@\n",((t.bytes[1]&EMV_CL_TRANS_TYPE_MSD)?@"MSD":@"EMV")];
     }
 
-    NSData *trackData=[dtdev emv2GetCardTracksEncryptedWithFormat:ALG_TRANSARMOR_DUKPT keyID:0 error:nil];
+    NSData *trackData=[linea emv2GetCardTracksEncryptedWithFormat:ALG_TRANSARMOR_DUKPT keyID:0 error:nil];
     if(trackData)
         [receipt appendFormat:@"Encrypted track data: %@\n",trackData];
     
@@ -366,7 +364,7 @@ static int getConfigurationVesrsion(NSData *configuration)
         if(t)
             t2Masked=[[NSString alloc] initWithData:t.data encoding:NSASCIIStringEncoding];
         
-        NSDictionary *card=[dtdev msProcessFinancialCard:t1Masked track2:t2Masked];
+        NSDictionary *card=[linea msProcessFinancialCard:t1Masked track2:t2Masked];
         if(card)
         {
             if([card valueForKey:@"cardholderName"])
@@ -392,9 +390,9 @@ static int getConfigurationVesrsion(NSData *configuration)
         
         if([dtdev getSupportedFeature:FEAT_PRINTING error:nil])
         {
-            [dtdev prnPrintText:@"{+B}{=C}TRANSACTION COMPLETE" error:nil];
-            [dtdev prnPrintText:receipt error:nil];
-            [dtdev prnFeedPaper:0 error:nil];
+            [linea prnPrintText:@"{+B}{=C}TRANSACTION COMPLETE" error:nil];
+            [linea prnPrintText:receipt error:nil];
+            [linea prnFeedPaper:0 error:nil];
         }
         
         [receipt insertString:[NSString stringWithFormat:@"nEMVCards: %d, success: %d, failed: %d\n",nRFCards,nRFCardSuccess,nRFCards-nRFCardSuccess] atIndex:0];
