@@ -1,4 +1,5 @@
 #import "dukpt.h"
+#import "string.h"
 
 size_t trides_crypto(int operation, int mode, const void *data, size_t length, void *result, const void *key)
 {

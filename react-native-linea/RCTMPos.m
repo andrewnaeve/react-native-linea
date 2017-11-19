@@ -234,6 +234,189 @@ static int getConfigurationVesrsion(NSData *configuration)
     return true;
 }
 
+-(void)emv2OnTransactionFinished:(NSData *)data;
+{
+    [progressViewController.view removeFromSuperview];
+    
+    NSLog(@"emv2OnTransactionFinished: %@",data);
+    
+    //try to get some encrypted tags and decrypt them
+    [self encryptedTagsDemo];
+    
+    [self performSelector:@selector(updateDisplay) withObject:nil afterDelay:1.5];
+    if(!data)
+    {
+        [dtdev emv2Deinitialise:nil];
+        displayAlert(@"Error", @"Transaction could not be completed!");
+        return;
+    }
+    
+    //emv2OnTransactionFinished is used to get the final response from the transaction in non-emulation mode
+    //data is extracted from the returned tags or manually asked for before calling emv2Deinitialise
+    
+    //parse data to display, send the rest to server
+    
+    //find and get Track1 masked and Track2 masked tags for display purposes
+    NSString *t1Masked=nil;
+    NSString *t2Masked=nil;
+    
+    NSArray *tags=[TLV decodeTags:data];
+    logView.text=[NSString stringWithFormat:@"Final tags:\n%@",tags];
+    
+    TLV *t;
+    
+    NSMutableString *receipt=[NSMutableString string];
+    NSLog(@"Tags: %@",tags);
+    
+    [receipt appendFormat:@"* Datecs Ltd *\n"];
+    [receipt appendFormat:@"\n"];
+    
+    
+    [receipt appendFormat:@"Terminal ID: %@\n",[EMVProcessorHelper decodeNib:[TLV findLastTag:TAG_9F1C_TERMINAL_ID tags:tags].data]];
+    [receipt appendFormat:@"\n"];
+    
+    [receipt appendFormat:@"Date: %@ %@\n",
+     [EMVProcessorHelper decodeDateString:[TLV findLastTag:TAG_9A_TRANSACTION_DATE tags:tags].data],
+     [EMVProcessorHelper decodeTimeString:[TLV findLastTag:TAG_9F21_TRANSACTION_TIME tags:tags].data]
+     ];
+    //    [receipt appendFormat:@"Transaction Sequence: %d\n",[EMVProcessorHelper decodeInt:[TLV findLastTag:TAG_9F41_TRANSACTION_SEQ_COUNTER tags:tags].data]];
+    //    [receipt appendFormat:@"\n"];
+    //
+    //    if([cardInfo valueForKey:@"cardholderName"])
+    //        [receipt appendFormat:@"Name: %@\n",[cardInfo valueForKey:@"cardholderName"]];
+    //    if([cardInfo valueForKey:@"accountNumber"])
+    //        [receipt appendFormat:@"PAN: %@\n",[cardInfo valueForKey:@"accountNumber"]];
+    //    if([TLV findLastTag:TAG_5F34_PAN_SEQUENCE_NUMBER tags:tags])
+    //    {
+    //        [receipt appendFormat:@"PAN-SEQ: %@\n",[EMVProcessorHelper decodeNib:[TLV findLastTag:TAG_5F34_PAN_SEQUENCE_NUMBER tags:tags].data]];
+    //    }
+    //    [receipt appendFormat:@"AID: %@\n",[EMVProcessorHelper decodeHexString:[TLV findLastTag:TAG_84_DF_NAME tags:tags].data]];
+    //    [receipt appendFormat:@"\n"];
+    
+    [receipt appendFormat:@"* Payment *\n"];
+    
+    
+    int transactionResult=[EMVProcessorHelper decodeInt:[TLV findLastTag:TAG_C1_TRANSACTION_RESULT tags:tags].data];
+    
+    nRFCards++;
+    NSString *transactionResultString=nil;
+    switch (transactionResult)
+    {
+        case EMV_RESULT_APPROVED:
+            transactionResultString=@"APPROVED";
+            nRFCardSuccess++;
+            break;
+        case EMV_RESULT_DECLINED:
+            nRFCardSuccess++;
+            transactionResultString=@"DECLINED";
+            break;
+        case EMV_RESULT_TRY_ANOTHER_INTERFACE:
+            transactionResultString=@"TRY ANOTHER INTERFACE";
+            break;
+        case EMV_RESULT_TRY_AGAIN:
+            transactionResultString=@"TRY AGAIN";
+            break;
+        case EMV_RESULT_END_APPLICATION:
+            transactionResultString=@"END APPLICATION";
+            break;
+    }
+    [receipt appendFormat:@"Transaction Result:\n"];
+    [receipt appendFormat:@"%@\n",transactionResultString];
+    [receipt appendFormat:@"\n"];
+
+
+    t=[TLV findLastTag:TAG_C3_TRANSACTION_INTERFACE tags:tags];
+    if(t)
+    {
+        const uint8_t *bytes=t.data.bytes;
+        switch (bytes[0]) {
+            case EMV_INTERFACE_CONTACT:
+                [receipt appendString:@"Interface: contact\n"];
+                break;
+            case EMV_INTERFACE_CONTACTLESS:
+                [receipt appendString:@"Interface: contactless\n"];
+                break;
+            case EMV_INTERFACE_MAGNETIC:
+                [receipt appendString:@"Interface: magnetic\n"];
+                break;
+            case EMV_INTERFACE_MAGNETIC_MANUAL:
+                [receipt appendString:@"Interface: manual entry\n"];
+                break;
+        }
+    }
+
+    t=[TLV findLastTag:TAG_C5_TRANSACTION_INFO tags:tags];
+    if(t)
+    {
+        [receipt appendFormat:@"CL Card Scheme: %d\n",t.bytes[0]];
+        [receipt appendFormat:@"Transaction Type: %@\n",((t.bytes[1]&EMV_CL_TRANS_TYPE_MSD)?@"MSD":@"EMV")];
+    }
+
+    NSData *trackData=[dtdev emv2GetCardTracksEncryptedWithFormat:ALG_TRANSARMOR_DUKPT keyID:0 error:nil];
+    if(trackData)
+        [receipt appendFormat:@"Encrypted track data: %@\n",trackData];
+    
+    if(transactionResult==EMV_RESULT_APPROVED)
+    {
+        t=[TLV findLastTag:TAG_D3_TRACK1_MASKED tags:tags];
+        if(t)
+            t1Masked=[[NSString alloc] initWithData:t.data encoding:NSASCIIStringEncoding];
+        t=[TLV findLastTag:TAG_D4_TRACK2_MASKED tags:tags];
+        if(t)
+            t2Masked=[[NSString alloc] initWithData:t.data encoding:NSASCIIStringEncoding];
+        
+        NSDictionary *card=[dtdev msProcessFinancialCard:t1Masked track2:t2Masked];
+        if(card)
+        {
+            if([card valueForKey:@"cardholderName"])
+                [receipt appendFormat:@"Name: %@\n",[card valueForKey:@"cardholderName"]];
+            if([card valueForKey:@"accountNumber"])
+                [receipt appendFormat:@"Number: %@\n",[card valueForKey:@"accountNumber"]];
+            
+            if([card valueForKey:@"expirationMonth"])
+                [receipt appendFormat:@"Expiration: %@/%@\n",[card valueForKey:@"expirationMonth"],[card valueForKey:@"expirationYear"]];
+            [receipt appendString:@"\n"];
+        }
+        
+        //try to get some encrypted tags and decrypt them
+        [self encryptedTagsDemo];
+    
+        //    [receipt appendFormat:@"TVR: %@\n",[EMVProcessorHelper decodeHexString:[TLV findLastTag:TAG_95_TVR tags:tags].data]];
+        //    [receipt appendFormat:@"TSI: %@\n",[EMVProcessorHelper decodeHexString:[TLV findLastTag:TAG_9B_TSI tags:tags].data]];
+        //    [receipt appendFormat:@"\n"];
+        //
+        //    NSString *issuerScriptResults=[EMVProcessorHelper decodeHexString:[TLV findLastTag:TAG_C8_ISSUER_SCRIPT_RESULTS tags:tags].data];
+        //    if(issuerScriptResults)
+        //        [receipt appendFormat:@"%@\n",issuerScriptResults];
+        
+        if([dtdev getSupportedFeature:FEAT_PRINTING error:nil])
+        {
+            [dtdev prnPrintText:@"{+B}{=C}TRANSACTION COMPLETE" error:nil];
+            [dtdev prnPrintText:receipt error:nil];
+            [dtdev prnFeedPaper:0 error:nil];
+        }
+        
+        [receipt insertString:[NSString stringWithFormat:@"nEMVCards: %d, success: %d, failed: %d\n",nRFCards,nRFCardSuccess,nRFCards-nRFCardSuccess] atIndex:0];
+        
+        
+        displayAlert(@"Transaction complete!", receipt);
+    }else
+    {
+        NSString *reasonMessage=@"Terminal declined";
+        t=[TLV findLastTag:TAG_C4_TRANSACTION_FAILED_REASON tags:tags];
+        if(t)
+        {
+            const uint8_t *bytes=t.data.bytes;
+            int reason=bytes[0];
+            if(reason==REASON_CANCELED)
+                reasonMessage=@"User cancelled";
+            if(reason==REASON_TIMEOUT)
+                reasonMessage=@"Transaction timed out";
+        }
+        displayAlert(@"Transaction failed!", reasonMessage);
+    }
+}
+
 -(void)encryptedTagsDemo
 {
     NSError *error;
