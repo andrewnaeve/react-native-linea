@@ -25,72 +25,7 @@ RCT_EXPORT_MODULE();
     return YES;
 }
 
-#pragma mark Events
-- (NSArray<NSString *> *)supportedEvents {
-    return @[
-                @"connectionState",
-                @"emvTransactionStarted",
-                @"smartCardInserted",
-                @"debug"
-            ];
-}
-
- // Events
-
-- (void)sendConnectionState:(NSString *)state {
-    [self sendEventWithName:@"connectionState" body:state];
-}
-
-- (void)sendDebug:(NSString *)debug {
-    [self sendEventWithName:@"debug" body:debug];
-}
-
-- (void)emv2OnTransactionStarted {
-    [self sendEventWithName:@"emvTransactionStarted" body:@"transaction started"];
-}
-
-- (void)smartCardInserted:(SC_SLOTS)slot {
-    [self sendEventWithName:@"smartCardInserted" body:@"smart card inserted"];
-}
-
--(void)emv2OnUserInterfaceCode:(int)code status:(int)status holdTime:(NSTimeInterval)holdTime {
-    [self sendEventWithName:@"debug" body:@"ui update"];
-}
-
--(void)emv2OnOnlineProcessing:(NSData *)data {
-    [self encryptedTagsDemo];
-    //called when the kernel wants an approval online from the server, encapsulate the server response tags
-    //in tag 0xE6 and set the server communication success or fail in tag C2
-    
-    //for the demo fake a successful server response (30 30)
-    NSData *serverResponse=[TLV encodeTags:@[[TLV tlvWithHexString:@"30 30" tag:TAG_8A_AUTH_RESP_CODE]]];
-    NSData *response=[TLV encodeTags:@[[TLV tlvWithHexString:@"01" tag:0xC2],[TLV tlvWithData:serverResponse tag:0xE6]]];
-    [linea emv2SetOnlineResult:response error:nil];
-
-    [self sendEventWithName:@"debug" body:@"on online processing"];
-}
-
--(void)emv2OnApplicationSelection:(NSData *)applicationTags {
-    [self sendEventWithName:@"debug" body:@"select application"];
-}
-
-- (void)connectionState:(int)state {
-    switch (state) {
-        case CONN_CONNECTED:
-            isConnected = YES;
-            [self sendConnectionState:@"connected"];
-            break;
-        case CONN_CONNECTING:
-            isConnected = NO;
-            [self sendConnectionState:@"connecting"];
-            break;
-        case CONN_DISCONNECTED:
-            isConnected = NO;
-            [self sendConnectionState:@"disconnected"];
-            break;
-    }
-}
-
+// Methods callable by React Native
 
 RCT_EXPORT_METHOD(connect) {
     linea = [DTDevices sharedDevice];
@@ -111,7 +46,164 @@ RCT_EXPORT_METHOD(startTransaction) {
     [self emv2StartTransaction];
 }
 
+// Events sent to React Native
 
+#pragma mark Events
+- (NSArray<NSString *> *)supportedEvents {
+    return @[
+                @"connectionState",
+                @"emvTransactionStarted",
+                @"smartCardInserted",
+                @"uiUpdate",
+                @"debug"
+            ];
+}
+
+- (void)sendConnectionState:(NSString *)state {
+    [self sendEventWithName:@"connectionState" body:state];
+}
+
+- (void)sendDebug:(NSString *)debug {
+    [self sendEventWithName:@"debug" body:debug];
+}
+
+- (void)emv2OnTransactionStarted {
+    [self sendEventWithName:@"emvTransactionStarted" body:@"transaction started"];
+}
+
+- (void)smartCardInserted:(SC_SLOTS)slot {
+    [self sendEventWithName:@"smartCardInserted" body:@"smart card inserted"];
+}
+
+-(void)emv2OnOnlineProcessing:(NSData *)data {
+    [self encryptedTagsDemo];
+    //called when the kernel wants an approval online from the server, encapsulate the server response tags
+    //in tag 0xE6 and set the server communication success or fail in tag C2
+    //for the demo fake a successful server response (30 30)
+    NSData *serverResponse=[TLV encodeTags:@[[TLV tlvWithHexString:@"30 30" tag:TAG_8A_AUTH_RESP_CODE]]];
+    NSData *response=[TLV encodeTags:@[[TLV tlvWithHexString:@"01" tag:0xC2],[TLV tlvWithData:serverResponse tag:0xE6]]];
+    [linea emv2SetOnlineResult:response error:nil];
+
+    [self sendEventWithName:@"debug" body:@"on online processing"];
+}
+
+-(void)emv2OnApplicationSelection:(NSData *)applicationTags {
+    [self sendEventWithName:@"debug" body:@"select application"];
+}
+
+-(void)emv2OnUserInterfaceCode:(int)code status:(int)status holdTime:(NSTimeInterval)holdTime;
+{
+    NSString *ui=@"";
+    NSString *uistatus=@"not provided";
+    switch (code)
+    {
+        case EMV_UI_NOT_WORKING:
+            ui = @"Not working";
+            break;
+        case EMV_UI_APPROVED:
+            ui = @"Approved";
+            break;
+        case EMV_UI_DECLINED:
+            ui = @"Declined";
+            break;
+        case EMV_UI_PLEASE_ENTER_PIN:
+            ui = @"Please enter PIN";
+            break;
+        case EMV_UI_ERROR_PROCESSING:
+            ui = @"Error processing";
+            break;
+        case EMV_UI_REMOVE_CARD:
+            ui = @"Please remove card";
+            break;
+        case EMV_UI_IDLE:
+            ui = @"Idle";
+            break;
+        case EMV_UI_PRESENT_CARD:
+            ui = @"Please present card";
+            break;
+        case EMV_UI_PROCESSING:
+            ui = @"Processing...";
+            break;
+        case EMV_UI_CARD_READ_OK_REMOVE:
+            ui = @"It is okay to remove card";
+            break;
+        case EMV_UI_TRY_OTHER_INTERFACE:
+            ui = @"Try another interface";
+            break;
+        case EMV_UI_CARD_COLLISION:
+            ui = @"Card collision";
+            break;
+        case EMV_UI_SIGN_APPROVED:
+            ui = @"Signature approved";
+            break;
+        case EMV_UI_ONLINE_AUTHORISATION:
+            ui = @"Online authorization";
+            break;
+        case EMV_UI_TRY_OTHER_CARD:
+            ui = @"Try another card";
+            break;
+        case EMV_UI_INSERT_CARD:
+            ui = @"Please insert card";
+            break;
+        case EMV_UI_CLEAR_DISPLAY:
+            ui = @"Clear display";
+            break;
+        case EMV_UI_SEE_PHONE:
+            ui = @"See phone";
+            break;
+        case EMV_UI_PRESENT_CARD_AGAIN:
+            ui = @"Please present card again";
+            break;
+        case EMV_UI_SELECT_APPLICAITON:
+            ui = @"Select application on device";
+            break;
+        case EMV_UI_MANUAL_ENTRY:
+            ui = @"Enter card on device";
+            break;
+        case EMV_UI_NA:
+            ui = @"N/A";
+            break;
+    }
+    switch (status)
+    {
+        case EMV_UI_STATUS_NOT_READY:
+            uistatus = @"Status Not Ready";
+            break;
+        case EMV_UI_STATUS_IDLE:
+            uistatus = @"Status Idle";
+            break;
+        case EMV_UI_STATUS_READY_TO_READ:
+            uistatus = @"Status Ready To Read";
+            break;
+        case EMV_UI_STATUS_PROCESSING:
+            uistatus = @"Status Processing";
+            break;
+        case EMV_UI_STATUS_CARD_READ_SUCCESS:
+            uistatus = @"Status Card Read Success";
+            break;
+        case EMV_UI_STATUS_ERROR_PROCESSING:
+            uistatus = @"Status Processing";
+            break;
+    }
+    [progressViewController updateText:ui];
+}
+
+- (void)connectionState:(int)state {
+    switch (state) {
+        case CONN_CONNECTED:
+            isConnected = YES;
+            [self sendConnectionState:@"connected"];
+            break;
+        case CONN_CONNECTING:
+            isConnected = NO;
+            [self sendConnectionState:@"connecting"];
+            break;
+        case CONN_DISCONNECTED:
+            isConnected = NO;
+            [self sendConnectionState:@"disconnected"];
+            break;
+    }
+}
 
 #define RF_COMMAND(operation,c) {if(!c){displayAlert(@"Operation failed!", [NSString stringWithFormat:@"%@ failed, error %@, code: %d",operation,error.localizedDescription,(int)error.code]); return false;} }
 
@@ -418,6 +510,8 @@ static int getConfigurationVesrsion(NSData *configuration)
     }
 }
 
+
+
 -(void)encryptedTagsDemo
 {
     NSError *error;
@@ -494,6 +588,7 @@ static int getConfigurationVesrsion(NSData *configuration)
     NSArray *t=[TLV decodeTags:tags];
     NSLog(@"Tags: %@",t);
 }
+
 
 
 

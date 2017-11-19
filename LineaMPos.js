@@ -21,11 +21,7 @@ export default class LineaMPos {
 
 	addConnectionStateListener(callback) {
 		return this.evt.addListener('connectionState', data => {
-			if (data === 'connected') {
-				callback(true);
-			} else {
-				callback(false);
-			}
+			callback(data);
 		});
 	}
 
@@ -43,6 +39,13 @@ export default class LineaMPos {
 
 	addDebugListener(callback) {
 		return this.evt.addListener('debug', data => {
+			console.log('debug:', data);
+			callback(data);
+		});
+	}
+
+	addUiUpdateListener(callback) {
+		return this.evt.addListener('uiUpdate', data => {
 			console.log('debug:', data);
 			callback(data);
 		});
