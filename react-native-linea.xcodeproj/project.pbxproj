@@ -17,6 +17,7 @@
 		BC56ABC11FBC0622001C7AF2 /* XMLParser.m in Sources */ = {isa = PBXBuildFile; fileRef = BC56ABC01FBC0622001C7AF2 /* XMLParser.m */; };
 		BC56ABC41FBC0692001C7AF2 /* EMVTLV.m in Sources */ = {isa = PBXBuildFile; fileRef = BC56ABC21FBC0692001C7AF2 /* EMVTLV.m */; };
 		BC9EE2911FC0FD6400AA402A /* dukpt.m in Sources */ = {isa = PBXBuildFile; fileRef = BC9EE2901FC0FD6400AA402A /* dukpt.m */; };
+		BC9EE2941FC1072400AA402A /* EMVProcessorHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = BC9EE2921FC1072400AA402A /* EMVProcessorHelper.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -66,6 +67,8 @@
 		BC7F562E1FBD42F000B849E7 /* EMVPrivateTags.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMVPrivateTags.h; sourceTree = "<group>"; };
 		BC9EE28F1FC0FD6400AA402A /* dukpt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dukpt.h; sourceTree = "<group>"; };
 		BC9EE2901FC0FD6400AA402A /* dukpt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dukpt.m; sourceTree = "<group>"; };
+		BC9EE2921FC1072400AA402A /* EMVProcessorHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EMVProcessorHelper.m; sourceTree = "<group>"; };
+		BC9EE2931FC1072400AA402A /* EMVProcessorHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMVProcessorHelper.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,6 +105,8 @@
 			isa = PBXGroup;
 			children = (
 				BC56ABAE1FBBF9FC001C7AF2 /* Config */,
+				BC9EE2931FC1072400AA402A /* EMVProcessorHelper.h */,
+				BC9EE2921FC1072400AA402A /* EMVProcessorHelper.m */,
 				BC56ABBC1FBBF9FD001C7AF2 /* Config.h */,
 				BC56ABBD1FBBF9FD001C7AF2 /* Config.m */,
 				BC7F562C1FBD39AF00B849E7 /* crc32.h */,
@@ -215,6 +220,7 @@
 				BC56AB8F1FBBCD87001C7AF2 /* RCTMPos.m in Sources */,
 				BC56ABBE1FBBF9FD001C7AF2 /* Config.m in Sources */,
 				17B4EBF01E165D3B00E47CA5 /* RCTLinea.m in Sources */,
+				BC9EE2941FC1072400AA402A /* EMVProcessorHelper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

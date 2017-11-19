@@ -9,6 +9,7 @@
 #import "EMVTags.h"
 #import "EMVPrivateTags.h"
 #import "dukpt.h"
+#import "EMVProcessorHelper.h"
 
 @implementation RCTMPos
 
