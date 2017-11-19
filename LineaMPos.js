@@ -21,6 +21,7 @@ export default class LineaMPos {
 
 	addConnectionStateListener(callback) {
 		return this.evt.addListener('connectionState', data => {
+			console.log('in mpos', data);
 			callback(data);
 		});
 	}

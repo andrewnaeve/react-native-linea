@@ -185,7 +185,6 @@ RCT_EXPORT_METHOD(startTransaction) {
             uiStatus = @"Status Processing";
             break;
     }
-    NSString *uiCodeAndStatus = @"UI: %@. Status: %@", ui, uiStatus;
     [self sendEventWithName:@"uiUpdate" body:ui];
     [self sendEventWithName:@"uiUpdate" body:uiStatus];
 }
