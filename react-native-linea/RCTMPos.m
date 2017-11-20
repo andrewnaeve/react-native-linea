@@ -197,7 +197,7 @@ RCT_EXPORT_METHOD(startTransaction) {
             break;
         case CONN_CONNECTING:
             isConnected = NO;
-            [self sendConnectionState:@"connecting"];
+            [self sendConnectionState:@"disconnected"];
             break;
         case CONN_DISCONNECTED:
             isConnected = NO;
