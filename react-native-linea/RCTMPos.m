@@ -54,6 +54,7 @@ RCT_EXPORT_METHOD(startTransaction) {
                 @"connectionState",
                 @"emvTransactionStarted",
                 @"smartCardInserted",
+                @"transactionSuccess",
                 @"uiUpdate",
                 @"debug"
             ];
@@ -491,7 +492,7 @@ static int getConfigurationVesrsion(NSData *configuration)
         [receipt insertString:[NSString stringWithFormat:@"nEMVCards: %d, success: %d, failed: %d\n",nRFCards,nRFCardSuccess,nRFCards-nRFCardSuccess] atIndex:0];
         
         [self sendEventWithName:@"debug" body:@"transaction complete"];
-        [self sendEventWithName:@"debug" body:receipt];
+        [self sendEventWithName:@"transactionSuccess" body:receipt];
         // displayAlert(@"Transaction complete!", receipt);
     }else
     {
