@@ -491,8 +491,7 @@ static int getConfigurationVesrsion(NSData *configuration)
         
         [receipt insertString:[NSString stringWithFormat:@"nEMVCards: %d, success: %d, failed: %d\n",nRFCards,nRFCardSuccess,nRFCards-nRFCardSuccess] atIndex:0];
         
-        [self sendEventWithName:@"debug" body:@"transaction complete"];
-        [self sendEventWithName:@"transactionFinished" body:receipt];
+        [self sendEventWithName:@"transactionFinished" body:@"success"];
         // displayAlert(@"Transaction complete!", receipt);
     }else
     {
@@ -508,7 +507,7 @@ static int getConfigurationVesrsion(NSData *configuration)
                 reasonMessage=@"Transaction timed out";
         }
         // displayAlert(@"Transaction failed!", reasonMessage);
-        [self sendEventWithName:@"transactionFinished" body:@"reasonMessage"];
+        [self sendEventWithName:@"transactionFinished" body:@"failure"];
     }
 }
 
