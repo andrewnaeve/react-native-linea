@@ -25,8 +25,8 @@ export default class LineaMPos {
 		});
 	}
 
-	addTransactionSuccessListener(callback) {
-		return this.evt.addListener('transactionSuccess', data => {
+	addTransactionFinishedListener(callback) {
+		return this.evt.addListener('transactionFinished', data => {
 			callback(data);
 		});
 	}

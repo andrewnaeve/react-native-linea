@@ -54,7 +54,7 @@ RCT_EXPORT_METHOD(startTransaction) {
                 @"connectionState",
                 @"emvTransactionStarted",
                 @"smartCardInserted",
-                @"transactionSuccess",
+                @"transactionFinished",
                 @"uiUpdate",
                 @"debug"
             ];
@@ -492,7 +492,7 @@ static int getConfigurationVesrsion(NSData *configuration)
         [receipt insertString:[NSString stringWithFormat:@"nEMVCards: %d, success: %d, failed: %d\n",nRFCards,nRFCardSuccess,nRFCards-nRFCardSuccess] atIndex:0];
         
         [self sendEventWithName:@"debug" body:@"transaction complete"];
-        [self sendEventWithName:@"transactionSuccess" body:receipt];
+        [self sendEventWithName:@"transactionFinished" body:receipt];
         // displayAlert(@"Transaction complete!", receipt);
     }else
     {
@@ -508,7 +508,7 @@ static int getConfigurationVesrsion(NSData *configuration)
                 reasonMessage=@"Transaction timed out";
         }
         // displayAlert(@"Transaction failed!", reasonMessage);
-        [self sendEventWithName:@"debug" body:@"transaction declined"];
+        [self sendEventWithName:@"transactionFinished" body:@"reasonMessage"];
     }
 }
 
