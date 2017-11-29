@@ -590,7 +590,29 @@ static int getConfigurationVesrsion(NSData *configuration)
     NSLog(@"Tags: %@",t);
 }
 
+// mifare functions
 
+-(bool)mifareAuthenticate:(int)cardIndex address:(int)address key:(NSData *)key error:(NSError **)error
+{
+    if(key==nil)
+    {
+        //use the default key
+        const uint8_t keyBytes[]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+        key=[NSData dataWithBytes:keyBytes length:sizeof(keyBytes)];
+    }
+    
+#ifdef MIARE_USE_STORED_KEY
+    if(![dtdev mfStoreKeyIndex:0 type:'A' key:key error:error])
+        return false;
+    if(![dtdev mfAuthByStoredKey:cardIndex type:'A' address:address keyIndex:0 error:error])
+        return false;
+#else
+    if(![dtdev mfAuthByKey:cardIndex type:'A' address:address key:key error:error])
+        return false;
+#endif
+    
+    return true;
+}
 
 
 @end
