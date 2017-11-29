@@ -46,6 +46,15 @@ RCT_EXPORT_METHOD(startTransaction) {
     [self emv2StartTransaction];
 }
 
+// rf card
+RCT_EXPORT_METHOD(initRf) {
+    [self initRf];
+}
+
+RCT_EXPORT_METHOD(writeRf) {
+    [self initRf];
+}
+
 // Events sent to React Native
 
 #pragma mark Events
@@ -56,7 +65,8 @@ RCT_EXPORT_METHOD(startTransaction) {
                 @"smartCardInserted",
                 @"transactionFinished",
                 @"uiUpdate",
-                @"debug"
+                @"debug",
+                @"rfCardDetected"
             ];
 }
 
@@ -92,103 +102,13 @@ RCT_EXPORT_METHOD(startTransaction) {
     [self sendEventWithName:@"debug" body:@"select application"];
 }
 
-// -(void)emv2OnUserInterfaceCode:(int)code status:(int)status holdTime:(NSTimeInterval)holdTime;
-// {
-//     NSString *ui=@"";
-//     NSString *uiStatus=@"not provided";
-//     switch (code)
-//     {
-//         case EMV_UI_NOT_WORKING:
-//             ui = @"Not working";
-//             break;
-//         case EMV_UI_APPROVED:
-//             ui = @"Approved";
-//             break;
-//         case EMV_UI_DECLINED:
-//             ui = @"Declined";
-//             break;
-//         case EMV_UI_PLEASE_ENTER_PIN:
-//             ui = @"Please enter PIN";
-//             break;
-//         case EMV_UI_ERROR_PROCESSING:
-//             ui = @"Error processing";
-//             break;
-//         case EMV_UI_REMOVE_CARD:
-//             ui = @"Please remove card";
-//             break;
-//         case EMV_UI_IDLE:
-//             ui = @"Idle";
-//             break;
-//         case EMV_UI_PRESENT_CARD:
-//             ui = @"Please present card";
-//             break;
-//         case EMV_UI_PROCESSING:
-//             ui = @"Processing...";
-//             break;
-//         case EMV_UI_CARD_READ_OK_REMOVE:
-//             ui = @"It is okay to remove card";
-//             break;
-//         case EMV_UI_TRY_OTHER_INTERFACE:
-//             ui = @"Try another interface";
-//             break;
-//         case EMV_UI_CARD_COLLISION:
-//             ui = @"Card collision";
-//             break;
-//         case EMV_UI_SIGN_APPROVED:
-//             ui = @"Signature approved";
-//             break;
-//         case EMV_UI_ONLINE_AUTHORISATION:
-//             ui = @"Online authorization";
-//             break;
-//         case EMV_UI_TRY_OTHER_CARD:
-//             ui = @"Try another card";
-//             break;
-//         case EMV_UI_INSERT_CARD:
-//             ui = @"Please insert card";
-//             break;
-//         case EMV_UI_CLEAR_DISPLAY:
-//             ui = @"Clear display";
-//             break;
-//         case EMV_UI_SEE_PHONE:
-//             ui = @"See phone";
-//             break;
-//         case EMV_UI_PRESENT_CARD_AGAIN:
-//             ui = @"Please present card again";
-//             break;
-//         case EMV_UI_SELECT_APPLICAITON:
-//             ui = @"Select application on device";
-//             break;
-//         case EMV_UI_MANUAL_ENTRY:
-//             ui = @"Enter card on device";
-//             break;
-//         case EMV_UI_NA:
-//             ui = @"N/A";
-//             break;
-//     }
-//     switch (status)
-//     {
-//         case EMV_UI_STATUS_NOT_READY:
-//             uiStatus = @"Status Not Ready";
-//             break;
-//         case EMV_UI_STATUS_IDLE:
-//             uiStatus = @"Status Idle";
-//             break;
-//         case EMV_UI_STATUS_READY_TO_READ:
-//             uiStatus = @"Status Ready To Read";
-//             break;
-//         case EMV_UI_STATUS_PROCESSING:
-//             uiStatus = @"Status Processing";
-//             break;
-//         case EMV_UI_STATUS_CARD_READ_SUCCESS:
-//             uiStatus = @"Status Card Read Success";
-//             break;
-//         case EMV_UI_STATUS_ERROR_PROCESSING:
-//             uiStatus = @"Status Processing";
-//             break;
-//     }
-//     [self sendEventWithName:@"uiUpdate" body:ui];
-//     [self sendEventWithName:@"uiUpdate" body:uiStatus];
-// }
+-(void)rfCardDetected:(int)cardIndex info:(DTRFCardInfo *)info {
+    NSError *err;
+    [self mifareAuthenticate:cardIndex address:4 key:nil error:err];
+    [self sendEventWithName:@"rfCardDetected" body:@"RF CARD WAS DETECTED!!!!"];
+    if(err)
+        [self sendEventWithName:@"debug" body:err.localizedDescription];
+}
 
 - (void)connectionState:(int)state {
     switch (state) {
@@ -592,7 +512,16 @@ static int getConfigurationVesrsion(NSData *configuration)
 
 // mifare functions
 
--(bool)mifareAuthenticate:(int)cardIndex address:(int)address key:(NSData *)key error:(NSError **)error
+
+-(void) initRf
+{
+    NSError *error = nil;
+    [linea rfInit:CARD_SUPPORT_TYPE_A error:nil];
+}
+
+
+
+-(bool)mifareAuthenticate:cardIndex:(int)cardIndex address:(int)address key:(NSData *)key error:(NSError **)error
 {
     if(key==nil)
     {
@@ -601,18 +530,47 @@ static int getConfigurationVesrsion(NSData *configuration)
         key=[NSData dataWithBytes:keyBytes length:sizeof(keyBytes)];
     }
     
-#ifdef MIARE_USE_STORED_KEY
-    if(![dtdev mfStoreKeyIndex:0 type:'A' key:key error:error])
+#ifdef MIFARE_USE_STORED_KEY
+    if(![linea mfStoreKeyIndex:0 type:'A' key:key error:error])
         return false;
-    if(![dtdev mfAuthByStoredKey:cardIndex type:'A' address:address keyIndex:0 error:error])
+    if(![linea mfAuthByStoredKey:cardIndex type:'A' address:address keyIndex:0 error:error])
         return false;
 #else
-    if(![dtdev mfAuthByKey:cardIndex type:'A' address:address key:key error:error])
+    if(![linea mfAuthByKey:cardIndex type:'A' address:address key:key error:error])
         return false;
 #endif
     
     return true;
 }
 
+-(bool)mifareSafeWrite:(int)cardIndex address:(int)address data:(NSData *)data key:(NSData *)key error:(NSError **)error
+{
+    if(address<4) //don't touch the first sector
+        return false;
+    
+    if(![self mifareAuthenticate:cardIndex address:address key:key error:error])
+        return nil;
+    
+    int r;
+    int written=0;
+    while (written<data.length)
+    {
+        uint8_t block[16]={0};
+        [data getBytes:block range:NSMakeRange(written, MIN(16, data.length-written))];
+        
+        if((address%4)==3)
+        {
+            address++;
+            if(![self mifareAuthenticate:cardIndex address:address key:key error:error])
+                return nil;
+        }
+        r=[linea mfWrite:cardIndex address:address data:[NSData dataWithBytes:block length:sizeof(block)] error:error];
+        if(!r)
+            return false;
+        written+=sizeof(block);
+        address++;
+    }
+    return true;
+}
 
 @end

@@ -1,6 +1,10 @@
 'use strict';
-import { MPos } from './NativeBridges';
-import { NativeEventEmitter } from 'react-native';
+import {
+	MPos
+} from './NativeBridges';
+import {
+	NativeEventEmitter
+} from 'react-native';
 
 export default class LineaMPos {
 	constructor() {
@@ -33,6 +37,12 @@ export default class LineaMPos {
 
 	addSmartCardInsertedListener(callback) {
 		return this.evt.addListener('smartCardInserted', data => {
+			callback(data);
+		});
+	}
+
+	addRfCardDetectedListener(callback) {
+		return this.evt.addListener('rfCardDetected', data => {
 			callback(data);
 		});
 	}
