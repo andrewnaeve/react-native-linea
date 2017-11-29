@@ -19,6 +19,10 @@ export default class LineaMPos {
 		MPos.initEmv();
 	}
 
+	initRf() {
+		MPos.initRf();
+	}
+
 	startTransaction() {
 		MPos.startTransaction();
 	}
