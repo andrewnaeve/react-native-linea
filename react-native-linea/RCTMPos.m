@@ -42,18 +42,22 @@ RCT_EXPORT_METHOD(initEmv) {
     [linea scCardPowerOn:SLOT_MAIN error:nil];
 }
 
+RCT_EXPORT_METHOD(deinitEmv) {
+    [self emv2Deinit];
+}
+
 RCT_EXPORT_METHOD(startTransaction) {
     [self emv2StartTransaction];
 }
 
 // rf card
 RCT_EXPORT_METHOD(initRf) {
-    [self initRf];
+    [self initializeRf];
 }
 
-RCT_EXPORT_METHOD(writeRf) {
-    [self initRf];
-}
+//RCT_EXPORT_METHOD(writeRf) {
+//    [self initRf];
+//}
 
 // Events sent to React Native
 
@@ -101,13 +105,19 @@ RCT_EXPORT_METHOD(writeRf) {
 -(void)emv2OnApplicationSelection:(NSData *)applicationTags {
     [self sendEventWithName:@"debug" body:@"select application"];
 }
-
+//-(bool)mifareAuthenticate:cardIndex:(int)cardIndex address:(int)address key:(NSData *)key error:(NSError **)error
 -(void)rfCardDetected:(int)cardIndex info:(DTRFCardInfo *)info {
-    NSError *err;
-    [self mifareAuthenticate:cardIndex address:4 key:nil error:err];
+    NSError *err = nil;
+    NSString *string = [NSString stringWithFormat:@"card index, %d", cardIndex];
+    [self sendEventWithName:@"debug" body:string];
+    [self mifareAuthenticate:cardIndex address:4 key:nil error:nil];
     [self sendEventWithName:@"rfCardDetected" body:@"RF CARD WAS DETECTED!!!!"];
-    if(err)
-        [self sendEventWithName:@"debug" body:err.localizedDescription];
+    
+    if(err) {
+        NSString *errorString = [NSString stringWithFormat:@"err, %@", err.localizedDescription];
+        [self sendEventWithName:@"debug" body:errorString];
+    }
+    
 }
 
 - (void)connectionState:(int)state {
@@ -197,6 +207,11 @@ static int getConfigurationVesrsion(NSData *configuration)
     }
     return true;
  }
+
+-(void) emv2Deinit
+{
+    [linea emv2Deinitialise:nil];
+}
 
  -(BOOL)emv2StartTransaction
  {
@@ -513,15 +528,14 @@ static int getConfigurationVesrsion(NSData *configuration)
 // mifare functions
 
 
--(void) initRf
+-(void) initializeRf
 {
-    NSError *error = nil;
     [linea rfInit:CARD_SUPPORT_TYPE_A error:nil];
 }
 
 
 
--(bool)mifareAuthenticate:cardIndex:(int)cardIndex address:(int)address key:(NSData *)key error:(NSError **)error
+-(bool)mifareAuthenticate:(int)cardIndex address:(int)address key:(NSData *)key error:(NSError **)error
 {
     if(key==nil)
     {
@@ -539,7 +553,7 @@ static int getConfigurationVesrsion(NSData *configuration)
     if(![linea mfAuthByKey:cardIndex type:'A' address:address key:key error:error])
         return false;
 #endif
-    
+    [self sendEventWithName:@"debug" body:@"successful auth maybe"];
     return true;
 }
 
@@ -547,17 +561,17 @@ static int getConfigurationVesrsion(NSData *configuration)
 {
     if(address<4) //don't touch the first sector
         return false;
-    
+
     if(![self mifareAuthenticate:cardIndex address:address key:key error:error])
         return nil;
-    
+
     int r;
     int written=0;
     while (written<data.length)
     {
         uint8_t block[16]={0};
         [data getBytes:block range:NSMakeRange(written, MIN(16, data.length-written))];
-        
+
         if((address%4)==3)
         {
             address++;

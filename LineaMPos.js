@@ -15,8 +15,12 @@ export default class LineaMPos {
 		MPos.connect();
 	}
 
-	initialize() {
+	initializeEmv() {
 		MPos.initEmv();
+	}
+
+	deinitializeEmv() {
+		MPos.deinitEmv();
 	}
 
 	initRf() {
