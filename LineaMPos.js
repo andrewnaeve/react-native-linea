@@ -23,12 +23,16 @@ export default class LineaMPos {
 		MPos.deinitEmv();
 	}
 
+	startTransaction() {
+		MPos.startTransaction();
+	}
+
 	initRf() {
 		MPos.initRf();
 	}
 
-	startTransaction() {
-		MPos.startTransaction();
+	writeRf() {
+		MPos.writeRf(amount);
 	}
 
 	addConnectionStateListener(callback) {

@@ -6,6 +6,7 @@ static int nRFCardSuccess=0;
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventDispatcher.h>
 #import <React/RCTEventEmitter.h>
+#import <React/RCTConvert.h>
 #import "Config.h"
 #import "EMVTLV.h"
 #import "crc32.h"
@@ -55,9 +56,15 @@ RCT_EXPORT_METHOD(initRf) {
     [self initializeRf];
 }
 
-//RCT_EXPORT_METHOD(writeRf) {
-//    [self initRf];
-//}
+
+RCT_EXPORT_METHOD(writeRf:(NSString *)data) {
+    NSError *error = nil;
+    const uint8_t keyBytes[]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+    NSData *key =[NSData dataWithBytes:keyBytes length:sizeof(keyBytes)];
+    [self mifareSafeWrite:0 address:4 data:[RCTConvert NSData:data] key:key error:&error];
+    NSString *errString = [NSString stringWithFormat:@"write error, %@", error];
+    [self sendEventWithName:@"debug" body:errString];
+}
 
 // Events sent to React Native
 
@@ -110,14 +117,14 @@ RCT_EXPORT_METHOD(initRf) {
     NSError *err = nil;
     NSString *string = [NSString stringWithFormat:@"card index, %d", cardIndex];
     [self sendEventWithName:@"debug" body:string];
-    [self mifareAuthenticate:cardIndex address:4 key:nil error:nil];
+    bool auth = [self mifareAuthenticate:cardIndex address:4 key:nil error:nil];
+    NSString *result = [NSString stringWithFormat:@"boooool, %d", auth];
     [self sendEventWithName:@"rfCardDetected" body:@"RF CARD WAS DETECTED!!!!"];
-    
+    [self sendEventWithName:@"debug" body:result];
     if(err) {
         NSString *errorString = [NSString stringWithFormat:@"err, %@", err.localizedDescription];
         [self sendEventWithName:@"debug" body:errorString];
     }
-    
 }
 
 - (void)connectionState:(int)state {
@@ -535,25 +542,18 @@ static int getConfigurationVesrsion(NSData *configuration)
 
 
 
--(bool)mifareAuthenticate:(int)cardIndex address:(int)address key:(NSData *)key error:(NSError **)error
+-(BOOL)mifareAuthenticate:(int)cardIndex address:(int)address key:(NSData *)key error:(NSError **)error
 {
+    NSError *err = nil;
     if(key==nil)
     {
         //use the default key
         const uint8_t keyBytes[]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
         key=[NSData dataWithBytes:keyBytes length:sizeof(keyBytes)];
     }
-    
-#ifdef MIFARE_USE_STORED_KEY
-    if(![linea mfStoreKeyIndex:0 type:'A' key:key error:error])
-        return false;
-    if(![linea mfAuthByStoredKey:cardIndex type:'A' address:address keyIndex:0 error:error])
-        return false;
-#else
-    if(![linea mfAuthByKey:cardIndex type:'A' address:address key:key error:error])
-        return false;
-#endif
-    [self sendEventWithName:@"debug" body:@"successful auth maybe"];
+    [linea mfAuthByKey:0 type:'A' address:0 key:key error:&err];
+    if (err)
+        [self sendEventWithName:@"debug" body:err.localizedDescription];
     return true;
 }
 
@@ -575,8 +575,8 @@ static int getConfigurationVesrsion(NSData *configuration)
         if((address%4)==3)
         {
             address++;
-            if(![self mifareAuthenticate:cardIndex address:address key:key error:error])
-                return nil;
+//            if(![self mifareAuthenticate:cardIndex address:address key:key error:error])
+//                return nil;
         }
         r=[linea mfWrite:cardIndex address:address data:[NSData dataWithBytes:block length:sizeof(block)] error:error];
         if(!r)
@@ -584,6 +584,7 @@ static int getConfigurationVesrsion(NSData *configuration)
         written+=sizeof(block);
         address++;
     }
+    
     return true;
 }
 
