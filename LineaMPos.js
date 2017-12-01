@@ -31,7 +31,7 @@ export default class LineaMPos {
 		MPos.initRf();
 	}
 
-	writeRf() {
+	writeRf(amount) {
 		MPos.writeRf(amount);
 	}
 
