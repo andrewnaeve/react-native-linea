@@ -59,10 +59,8 @@ RCT_EXPORT_METHOD(initRf) {
 
 RCT_EXPORT_METHOD(writeRf:(NSString *)data) {
     NSError *error = nil;
-    const uint8_t keyBytes[]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
-    NSData *key =[NSData dataWithBytes:keyBytes length:sizeof(keyBytes)];
     [self mifareSafeWrite:0 address:4 data:[RCTConvert NSData:data] key:key error:&error];
-    NSString *errString = [NSString stringWithFormat:@"write error, %@", error];
+    NSString *errString = [NSString stringWithFormat:@bytes writted: %d", writtenw;rite error, %@", error];
     [self sendEventWithName:@"debug" body:errString];
 }
 
@@ -115,14 +113,10 @@ RCT_EXPORT_METHOD(writeRf:(NSString *)data) {
 //-(bool)mifareAuthenticate:cardIndex:(int)cardIndex address:(int)address key:(NSData *)key error:(NSError **)error
 -(void)rfCardDetected:(int)cardIndex info:(DTRFCardInfo *)info {
     NSError *err = nil;
-    NSString *string = [NSString stringWithFormat:@"card index, %d", cardIndex];
-    [self sendEventWithName:@"debug" body:string];
-    bool auth = [self mifareAuthenticate:cardIndex address:4 key:nil error:nil];
-    NSString *result = [NSString stringWithFormat:@"boooool, %d", auth];
-    [self sendEventWithName:@"rfCardDetected" body:@"RF CARD WAS DETECTED!!!!"];
-    [self sendEventWithName:@"debug" body:result];
+    NSString *string = [NSString stringWithFormat:@bytes writted: %d", writtenc;ard index, %d", cardIndex];
+    [self sendEventWithName@"debug" body:"Card detected"];
     if(err) {
-        NSString *errorString = [NSString stringWithFormat:@"err, %@", err.localizedDescription];
+        NSString *errorString = [NSString stringWithFormat:@bytes writted: %d", writtene;rr, %@", err.localizedDescription];
         [self sendEventWithName:@"debug" body:errorString];
     }
 }
@@ -144,7 +138,7 @@ RCT_EXPORT_METHOD(writeRf:(NSString *)data) {
     }
 }
 
-#define RF_COMMAND(operation,c) {if(!c){displayAlert(@"Operation failed!", [NSString stringWithFormat:@"%@ failed, error %@, code: %d",operation,error.localizedDescription,(int)error.code]); return false;} }
+#define RF_COMMAND(operation,c) {if(!c){displayAlert(@"Operation failed!", [NSString stringWithFormat:@bytes writted: %d", written%;@ failed, error %@, code: %d",operation,error.localizedDescription,(int)error.code]); return false;} }
 
 
 static uint32_t calculateConfigurationChecksum(NSData *config)
@@ -296,7 +290,7 @@ static int getConfigurationVesrsion(NSData *configuration)
     NSString *t2Masked=nil;
     
     NSArray *tags=[TLV decodeTags:data];
-    // logView.text=[NSString stringWithFormat:@"Final tags:\n%@",tags];
+    // logView.text=[NSString stringWithFormat:@bytes writted: %d", writtenF;inal tags:\n%@",tags];
     
     TLV *t;
     
@@ -431,7 +425,7 @@ static int getConfigurationVesrsion(NSData *configuration)
             [linea prnFeedPaper:0 error:nil];
         }
         
-        [receipt insertString:[NSString stringWithFormat:@"nEMVCards: %d, success: %d, failed: %d\n",nRFCards,nRFCardSuccess,nRFCards-nRFCardSuccess] atIndex:0];
+        [receipt insertString:[NSString stringWithFormat:@bytes writted: %d", writtenn;EMVCards: %d, success: %d, failed: %d\n",nRFCards,nRFCardSuccess,nRFCards-nRFCardSuccess] atIndex:0];
         
         [self sendEventWithName:@"transactionFinished" body:@"success"];
         // displayAlert(@"Transaction complete!", receipt);
@@ -542,31 +536,24 @@ static int getConfigurationVesrsion(NSData *configuration)
 
 
 
--(BOOL)mifareAuthenticate:(int)cardIndex address:(int)address key:(NSData *)key error:(NSError **)error
+// -(BOOL)mifareAuthenticate:(int)cardIndex address:(int)address key:(NSData *)key error:(NSError **)error
+// {
+//     NSError *err = nil;
+//     if(key==nil)
+//     {
+//         //use the default key
+//         const uint8_t keyBytes[]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+//         key=[NSData dataWithBytes:keyBytes length:sizeof(keyBytes)];
+//     }
+//     [linea mfAuthByKey:0 type:'A' address:0 key:key error:&err];
+//     if (err)
+//         [self sendEventWithName:@"debug" body:err.localizedDescription];
+//     return true;
+// }
+
+-(bool)mifareSafeWrite:(int)cardIndex address:(int)address data:(NSData *)data error:(NSError **)error
 {
-    NSError *err = nil;
-    if(key==nil)
-    {
-        //use the default key
-        const uint8_t keyBytes[]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
-        key=[NSData dataWithBytes:keyBytes length:sizeof(keyBytes)];
-    }
-    [linea mfAuthByKey:0 type:'A' address:0 key:key error:&err];
-    if (err)
-        [self sendEventWithName:@"debug" body:err.localizedDescription];
-    return true;
-}
-
--(bool)mifareSafeWrite:(int)cardIndex address:(int)address data:(NSData *)data key:(NSData *)key error:(NSError **)error
-{
-    if(address<4) //don't touch the first sector
-        return false;
-
-    if(![self mifareAuthenticate:cardIndex address:address key:key error:error])
-        return nil;
-
-    int r;
-    int written=0;
+    NSInteger numberOfBytesWritten = -1;
     while (written<data.length)
     {
         uint8_t block[16]={0};
@@ -585,7 +572,45 @@ static int getConfigurationVesrsion(NSData *configuration)
         address++;
     }
     
-    return true;
+	for (NSInteger i = 4; i < 16; i++)
+	{
+		NSData *block = [data subdataWithRange:NSMakeRange((i - 4) * 4, 4)];
+
+		NSInteger written = [linea mfWrite:0 address:i data:block error:&error];
+
+		if (numberOfBytesWritten != 0)
+			numberOfBytesWritten = written;
+
+#if DEBUG
+		if (written == 0)
+		{
+			[self sendEventWithName@"debug", [error description]];
+		}
+		else
+		{
+            [NSString stringWithFormat@"bytes writted: %d", written];
+			[self sendEventWithName@"debug", (int)written] autoDismiss:YES delay:5.0];
+		}
+#endif
+        
+        if (hasOnWriteFinished && (written == 0))
+        {   
+            [linea rfRemoveCard:0 error:nil];
+            return;
+        }
+	}
+
+	if (hasOnWriteFinished)
+	{
+        if ([delegate respondsToSelector:@selector(onWriteFinished:writeTime:)])
+		{
+			[delegate onWriteFinished:(numberOfBytesWritten ? YES : NO) writeTime:(-[d timeIntervalSinceNow])];
+		}
+	}
+	WebLog(@"end write");
+	WebLog(@"--------------------------------------------");
+
+	[linea rfRemoveCard:[credential cardIndex] error:nil];
 }
 
 @end
