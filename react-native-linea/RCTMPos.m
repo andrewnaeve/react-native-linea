@@ -117,7 +117,7 @@ RCT_EXPORT_METHOD(readRf) {
 }
 
 -(void)rfCardDetected:(int)cardIndex info:(DTRFCardInfo *)info {
-    [self sendEventWithName:@"debug" body:@"Card detected"];
+    [self sendEventWithName:@"rfCardDetected" body:@"Card detected"];
 }
 
 - (void)connectionState:(int)state {
