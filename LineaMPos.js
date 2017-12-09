@@ -65,6 +65,18 @@ export default class LineaMPos {
 		});
 	}
 
+	addReadListener(callback) {
+		return this.evt.addListener('read', data => {
+			callback(data);
+		});
+	}
+
+	addReceiptListener(callback) {
+		return this.evt.addListener('receipt', data => {
+			callback(data);
+		});
+	}
+
 	addDebugListener(callback) {
 		return this.evt.addListener('debug', data => {
 			console.log('debug:', data);
@@ -74,7 +86,6 @@ export default class LineaMPos {
 
 	addUiUpdateListener(callback) {
 		return this.evt.addListener('uiUpdate', data => {
-			console.log('debug:', data);
 			callback(data);
 		});
 	}

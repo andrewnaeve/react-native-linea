@@ -78,7 +78,9 @@ RCT_EXPORT_METHOD(readRf) {
                 @"transactionFinished",
                 @"uiUpdate",
                 @"debug",
-                @"rfCardDetected"
+                @"rfCardDetected",
+                @"read",
+                @"receipt"
             ];
 }
 
@@ -423,7 +425,7 @@ static int getConfigurationVesrsion(NSData *configuration)
         }
         
         [receipt insertString:[NSString stringWithFormat:@"nEMVCards: %d, success: %d, failed: %d\n",nRFCards,nRFCardSuccess,nRFCards-nRFCardSuccess] atIndex:0];
-        
+        [self sendEventWithName:@"receipt" body:receipt];
         [self sendEventWithName:@"transactionFinished" body:@"success"];
         // displayAlert(@"Transaction complete!", receipt);
     }else
@@ -579,7 +581,35 @@ static int getConfigurationVesrsion(NSData *configuration)
         read+=16;
         addr++;
     }
-    NSString *string = [NSString stringWithFormat:@"that data tho: %@", data];
-    [self sendEventWithName:@"debug" body:string];
+    
+    //NSString *result = hexToString(@"Value", &data, data.length);
+    
+    NSString *result = [NSString stringWithFormat:@"%@", data];
+    [self sendEventWithName:@"read" body:result];
+    
+}
+
+NSString *hexToString(NSString *label, const void *data, int length)
+{
+    const char HEX[] = "0123456789ABCDEF";
+    char s[2000];
+    
+    for (int i = 0; i < length; i++)
+    {
+        s[i * 3] = HEX[((uint8_t *)data)[i] >> 4];
+        s[i * 3 + 1] = HEX[((uint8_t *)data)[i] & 0x0f];
+        s[i * 3 + 2] = ' ';
+    }
+    
+    s[length * 3] = 0;
+    
+    if (label)
+    {
+        return [NSString stringWithFormat:@"yo yo yo %@(%d): %s", label, length, s];
+    }
+    else
+    {
+        return [NSString stringWithCString:s encoding:NSASCIIStringEncoding];
+    }
 }
 @end
