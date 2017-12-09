@@ -61,7 +61,7 @@ RCT_EXPORT_METHOD(writeRf:(NSString *)data) {
     [self mifareSafeWrite:0 address:4 data:[RCTConvert NSData:data] error:nil];
 }
 
-RCT_EXPORT_METHOD(readRf:(NSString *)data) {
+RCT_EXPORT_METHOD() {
     [self mifareSafeRead:0 error:nil];
 }
 
