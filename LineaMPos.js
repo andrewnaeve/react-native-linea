@@ -1,10 +1,6 @@
 'use strict';
-import {
-	MPos
-} from './NativeBridges';
-import {
-	NativeEventEmitter
-} from 'react-native';
+import { MPos } from './NativeBridges';
+import { NativeEventEmitter } from 'react-native';
 
 export default class LineaMPos {
 	constructor() {
@@ -33,6 +29,10 @@ export default class LineaMPos {
 
 	writeRf(amount) {
 		MPos.writeRf(amount);
+	}
+
+	readRf() {
+		MPos.readRf();
 	}
 
 	addConnectionStateListener(callback) {

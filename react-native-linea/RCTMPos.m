@@ -58,11 +58,14 @@ RCT_EXPORT_METHOD(initRf) {
 
 
 RCT_EXPORT_METHOD(writeRf:(NSString *)data) {
-    NSError *error = nil;
-    [self mifareSafeWrite:0 address:4 data:[RCTConvert NSData:data] key:key error:&error];
-    NSString *errString = [NSString stringWithFormat:@bytes writted: %d", writtenw;rite error, %@", error];
-    [self sendEventWithName:@"debug" body:errString];
+    [self mifareSafeWrite:0 address:4 data:[RCTConvert NSData:data] error:nil];
 }
+
+RCT_EXPORT_METHOD(readRf:(NSString *)data) {
+    [self mifareSafeRead:0 error:nil];
+}
+
+
 
 // Events sent to React Native
 
@@ -110,15 +113,9 @@ RCT_EXPORT_METHOD(writeRf:(NSString *)data) {
 -(void)emv2OnApplicationSelection:(NSData *)applicationTags {
     [self sendEventWithName:@"debug" body:@"select application"];
 }
-//-(bool)mifareAuthenticate:cardIndex:(int)cardIndex address:(int)address key:(NSData *)key error:(NSError **)error
+
 -(void)rfCardDetected:(int)cardIndex info:(DTRFCardInfo *)info {
-    NSError *err = nil;
-    NSString *string = [NSString stringWithFormat:@bytes writted: %d", writtenc;ard index, %d", cardIndex];
-    [self sendEventWithName@"debug" body:"Card detected"];
-    if(err) {
-        NSString *errorString = [NSString stringWithFormat:@bytes writted: %d", writtene;rr, %@", err.localizedDescription];
-        [self sendEventWithName:@"debug" body:errorString];
-    }
+    [self sendEventWithName:@"debug" body:@"Card detected"];
 }
 
 - (void)connectionState:(int)state {
@@ -425,7 +422,7 @@ static int getConfigurationVesrsion(NSData *configuration)
             [linea prnFeedPaper:0 error:nil];
         }
         
-        [receipt insertString:[NSString stringWithFormat:@bytes writted: %d", writtenn;EMVCards: %d, success: %d, failed: %d\n",nRFCards,nRFCardSuccess,nRFCards-nRFCardSuccess] atIndex:0];
+        [receipt insertString:[NSString stringWithFormat:@"nEMVCards: %d, success: %d, failed: %d\n",nRFCards,nRFCardSuccess,nRFCards-nRFCardSuccess] atIndex:0];
         
         [self sendEventWithName:@"transactionFinished" body:@"success"];
         // displayAlert(@"Transaction complete!", receipt);
@@ -551,66 +548,38 @@ static int getConfigurationVesrsion(NSData *configuration)
 //     return true;
 // }
 
--(bool)mifareSafeWrite:(int)cardIndex address:(int)address data:(NSData *)data error:(NSError **)error
+-(void)mifareSafeWrite:(int)cardIndex address:(int)address data:(NSData *)data error:(NSError **)error
 {
-    NSInteger numberOfBytesWritten = -1;
+    NSError *err = nil;
+    int r;
+    int written=0;
+    int addr = 4;
     while (written<data.length)
     {
         uint8_t block[16]={0};
         [data getBytes:block range:NSMakeRange(written, MIN(16, data.length-written))];
-
-        if((address%4)==3)
-        {
-            address++;
-//            if(![self mifareAuthenticate:cardIndex address:address key:key error:error])
-//                return nil;
-        }
-        r=[linea mfWrite:cardIndex address:address data:[NSData dataWithBytes:block length:sizeof(block)] error:error];
-        if(!r)
-            return false;
+        r=[linea mfWrite:cardIndex address:addr data:[NSData dataWithBytes:block length:sizeof(block)] error:&err];
         written+=sizeof(block);
-        address++;
+        addr++;
     }
-    
-	for (NSInteger i = 4; i < 16; i++)
-	{
-		NSData *block = [data subdataWithRange:NSMakeRange((i - 4) * 4, 4)];
-
-		NSInteger written = [linea mfWrite:0 address:i data:block error:&error];
-
-		if (numberOfBytesWritten != 0)
-			numberOfBytesWritten = written;
-
-#if DEBUG
-		if (written == 0)
-		{
-			[self sendEventWithName@"debug", [error description]];
-		}
-		else
-		{
-            [NSString stringWithFormat@"bytes writted: %d", written];
-			[self sendEventWithName@"debug", (int)written] autoDismiss:YES delay:5.0];
-		}
-#endif
-        
-        if (hasOnWriteFinished && (written == 0))
-        {   
-            [linea rfRemoveCard:0 error:nil];
-            return;
-        }
-	}
-
-	if (hasOnWriteFinished)
-	{
-        if ([delegate respondsToSelector:@selector(onWriteFinished:writeTime:)])
-		{
-			[delegate onWriteFinished:(numberOfBytesWritten ? YES : NO) writeTime:(-[d timeIntervalSinceNow])];
-		}
-	}
-	WebLog(@"end write");
-	WebLog(@"--------------------------------------------");
-
-	[linea rfRemoveCard:[credential cardIndex] error:nil];
+    if (err)
+        [self sendEventWithName:@"debug" body:err];
+	[linea rfRemoveCard:0 error:nil];
 }
 
+-(void)mifareSafeRead:(int)cardIndex error:(NSError **)error
+{
+    NSMutableData *data=[NSMutableData data];
+    int read=0;
+    int addr = 4;
+    while (read<8)
+    {
+        NSData *block=[linea mfRead:0 address:addr length:16 error:error];
+        [data appendData:block];
+        read+=16;
+        addr++;
+    }
+    NSString *string = [NSString stringWithFormat:@"that data tho: %@", data];
+    [self sendEventWithName:@"debug" body:string];
+}
 @end
