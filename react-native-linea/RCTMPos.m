@@ -347,32 +347,7 @@ static int getConfigurationVesrsion(NSData *configuration)
 
 
     t=[TLV findLastTag:TAG_C3_TRANSACTION_INTERFACE tags:tags];
-    if(t)
-    {
-        const uint8_t *bytes=t.data.bytes;
-        switch (bytes[0]) {
-            case EMV_INTERFACE_CONTACT:
-                [receipt appendString:@"Interface: contact\n"];
-                break;
-            case EMV_INTERFACE_CONTACTLESS:
-                [receipt appendString:@"Interface: contactless\n"];
-                break;
-            case EMV_INTERFACE_MAGNETIC:
-                [receipt appendString:@"Interface: magnetic\n"];
-                break;
-            case EMV_INTERFACE_MAGNETIC_MANUAL:
-                [receipt appendString:@"Interface: manual entry\n"];
-                break;
-        }
-    }
-
-    t=[TLV findLastTag:TAG_C5_TRANSACTION_INFO tags:tags];
-    if(t)
-    {
-        [receipt appendFormat:@"CL Card Scheme: %d\n",t.bytes[0]];
-        [receipt appendFormat:@"Transaction Type: %@\n",((t.bytes[1]&EMV_CL_TRANS_TYPE_MSD)?@"MSD":@"EMV")];
-    }
-
+    
     NSData *trackData=[linea emv2GetCardTracksEncryptedWithFormat:ALG_TRANSARMOR_DUKPT keyID:0 error:nil];
     if(trackData)
         [receipt appendFormat:@"Encrypted track data: %@\n",trackData];
