@@ -296,13 +296,6 @@ static int getConfigurationVesrsion(NSData *configuration)
     NSMutableString *receipt=[NSMutableString string];
     NSLog(@"Tags: %@",tags);
     
-    [receipt appendFormat:@"* Datecs Ltd *\n"];
-    [receipt appendFormat:@"\n"];
-    
-    
-    [receipt appendFormat:@"Terminal ID: %@\n",[EMVProcessorHelper decodeNib:[TLV findLastTag:TAG_9F1C_TERMINAL_ID tags:tags].data]];
-    [receipt appendFormat:@"\n"];
-    
     [receipt appendFormat:@"Date: %@ %@\n",
      [EMVProcessorHelper decodeDateString:[TLV findLastTag:TAG_9A_TRANSACTION_DATE tags:tags].data],
      [EMVProcessorHelper decodeTimeString:[TLV findLastTag:TAG_9F21_TRANSACTION_TIME tags:tags].data]
@@ -423,8 +416,6 @@ static int getConfigurationVesrsion(NSData *configuration)
             [linea prnPrintText:receipt error:nil];
             [linea prnFeedPaper:0 error:nil];
         }
-        
-        [receipt insertString:[NSString stringWithFormat:@"nEMVCards: %d, success: %d, failed: %d\n",nRFCards,nRFCardSuccess,nRFCards-nRFCardSuccess] atIndex:0];
         [self sendEventWithName:@"receipt" body:receipt];
         [self sendEventWithName:@"transactionFinished" body:@"success"];
         // displayAlert(@"Transaction complete!", receipt);
