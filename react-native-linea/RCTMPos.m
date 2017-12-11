@@ -56,6 +56,10 @@ RCT_EXPORT_METHOD(initRf) {
     [self initializeRf];
 }
 
+RCT_EXPORT_METHOD(closeRf) {
+    [self deinitializeRf];
+}
+
 
 RCT_EXPORT_METHOD(writeRf:(NSString *)data) {
     [self mifareSafeWrite:0 address:4 data:[RCTConvert NSData:data] error:nil];
@@ -347,7 +351,7 @@ static int getConfigurationVesrsion(NSData *configuration)
 
 
     t=[TLV findLastTag:TAG_C3_TRANSACTION_INTERFACE tags:tags];
-    
+
     NSData *trackData=[linea emv2GetCardTracksEncryptedWithFormat:ALG_TRANSARMOR_DUKPT keyID:0 error:nil];
     if(trackData)
         [receipt appendFormat:@"Encrypted track data: %@\n",trackData];
@@ -498,6 +502,12 @@ static int getConfigurationVesrsion(NSData *configuration)
 {
     [linea rfInit:CARD_SUPPORT_TYPE_A error:nil];
 }
+
+-(void) deinitializeRf
+{
+    [linea rfClose:nil];
+}
+
 
 
 
